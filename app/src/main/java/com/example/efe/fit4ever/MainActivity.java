@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         TabHost pencere = (TabHost) findViewById(R.id.tabHost);
         pencere.setup();
-        Toast.makeText(this," ",Toast.LENGTH_LONG).show();
+        
         TabHost.TabSpec workouts = pencere.newTabSpec("Workouts");
         workouts.setContent(R.id.workouts);
         workouts.setIndicator("Workouts");
