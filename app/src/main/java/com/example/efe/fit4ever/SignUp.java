@@ -23,6 +23,7 @@ public class SignUp extends AppCompatActivity {
         adapter = ArrayAdapter.createFromResource(this,R.array.gender,android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         spinner.setAdapter(adapter);
+
     }
 
     public void signupComplete(View view){
