@@ -42,12 +42,6 @@
                     android:weightSum="1"
                     android:layout_gravity="center_horizontal|top">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="No workouts yet"
-                        android:id="@+id/textView3"
-                        android:layout_gravity="center" />
                 </LinearLayout>
 
                 <LinearLayout

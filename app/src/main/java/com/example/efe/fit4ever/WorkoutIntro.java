@@ -72,7 +72,7 @@ public class WorkoutIntro extends AppCompatActivity {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            ConnURL = "jdbc:jtds:sqlserver://192.168.1.21:1433/Fit4ever";
+            ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Fit4ever";
             conn = DriverManager.getConnection(ConnURL,"efe","e1234567");
             System.out.println("connected");
         } catch (SQLException se) {
