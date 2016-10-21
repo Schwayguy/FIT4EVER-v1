@@ -157,11 +157,11 @@ public class MainActivity extends AppCompatActivity {
 
                         btnWorks.setOnClickListener(new View.OnClickListener() {
                             public void onClick(View v) {
-                            /*
-                                Intent intent = new Intent(getBaseContext(), WorkoutIntro.class);
+
+                                Intent intent = new Intent(getBaseContext(), MyWorkout.class);
                                 intent.putExtra("PROGID", progId);
                                 startActivity(intent);
-                            */
+
                             }
                         });
 
