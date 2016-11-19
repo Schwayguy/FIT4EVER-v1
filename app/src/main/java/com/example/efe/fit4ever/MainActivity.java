@@ -283,9 +283,9 @@ public class MainActivity extends AppCompatActivity {
             conn = DriverManager.getConnection(ConnURL, "efe", "e1234567");
             System.out.println("connected");
         } catch (SQLException se) {
-            Log.e("ERRO1", se.getMessage());
+            Log.e("ERROr1", se.getMessage());
         } catch (ClassNotFoundException e) {
-            Log.e("ERRO2", e.getMessage());
+            Log.e("ERROr2", e.getMessage());
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong while trying to connect to the database, please check your internet connection.", Toast.LENGTH_LONG).show();
         }
