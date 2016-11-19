@@ -118,9 +118,9 @@ public class MainActivity extends AppCompatActivity {
             while (result.next()) {
                 Button btnTag = new Button(this);
                 btnTag.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-                btnTag.setText(result.getString("ProgramName") + " by " + result.getString("ProgramOwner"));
+                btnTag.setText(result.getString("Title") );
                 layout.addView(btnTag);
-                final String progId = result.getString("ProgramId");
+                final String progId = result.getString("ID");
                 btnTag.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
 
@@ -146,14 +146,14 @@ public class MainActivity extends AppCompatActivity {
             Log.d("efe", userId);
             try {
                 Statement statement2 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                final ResultSet myworkoutsRes = statement2.executeQuery("SELECT ProgramId FROM WorkoutsOfUsers where UserID =" + userId);
+                final ResultSet myworkoutsRes = statement2.executeQuery("SELECT ProgramID FROM UPRelations where UserID =" + userId);
                 while (myworkoutsRes.next()) {
                     Button btnWorks = new Button(this);
                     btnWorks.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-                        btnWorks.setText(myworkoutsRes.getString("ProgramId"));
-                        Log.d("24", myworkoutsRes.getString("ProgramId"));
+                        btnWorks.setText(myworkoutsRes.getString("ProgramID"));
+                        Log.d("24", myworkoutsRes.getString("ProgramID"));
                         layout.addView(btnWorks);
-                        final String progId = myworkoutsRes.getString("ProgramId");
+                        final String progId = myworkoutsRes.getString("ProgramID");
 
                         btnWorks.setOnClickListener(new View.OnClickListener() {
                             public void onClick(View v) {
@@ -175,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
             txt.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
             layout.addView(txt);
         }
+
         pencere.setCurrentTab(0);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -196,21 +197,24 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         try {
-            ResultSet loginRes = statement.executeQuery("select * from Programs ");
+            ResultSet loginRes = statement.executeQuery("select * from Users where Email ='"+usernameField.getText().toString()+"' AND Password='"+ passwordField.getText().toString()+"'");
+            if(!loginRes.next()){
+             Toast.makeText(this,"Wrong email or password.",Toast.LENGTH_SHORT).show();
+            }else {
+                editor.putString("lastLoginDate", Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DAY_OF_MONTH);
+                editor.putString("userId", loginRes.getString("ID"));
+                editor.putString("email", usernameField.getText().toString());
+                editor.putString("password", passwordField.getText().toString());
+                editor.apply();
+                finish();
+                startActivity(getIntent());
+
+                displayData(view);
+            }
         } catch (SQLException e) {
             Log.e("ERROR", e.getMessage());
         }
 
-
-        editor.putString("lastLoginDate", Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DAY_OF_MONTH);
-        editor.putString("userId", "'e9bee8be-8897-42db-930d-892a4699f0dc'");
-        editor.putString("email", usernameField.getText().toString());
-        editor.putString("password", passwordField.getText().toString());
-        editor.apply();
-        finish();
-        startActivity(getIntent());
-
-        displayData(view);
     }
 
 
@@ -238,7 +242,20 @@ public class MainActivity extends AppCompatActivity {
     public void setWeight(View view) {
         weightText = (EditText) findViewById(R.id.weightText);
         String wT = weightText.getText().toString();
+        Statement statement = null;
+        try {
+            statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         if (!wT.isEmpty()) {
+            try {
+                statement.executeUpdate("update Users set Weight='"+wT+"' where ID ="+sharedPref.getString("userId", ""));
+            }
+            catch (SQLException e) {
+                Log.e("ERROR", e.getMessage());
+            }
             curWeight = Integer.parseInt(wT);
             InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             mgr.hideSoftInputFromWindow(weightText.getWindowToken(), 0);
@@ -262,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Fit4ever";
+            ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Workout";
             conn = DriverManager.getConnection(ConnURL, "efe", "e1234567");
             System.out.println("connected");
         } catch (SQLException se) {

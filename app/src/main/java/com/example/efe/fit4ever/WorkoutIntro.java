@@ -47,17 +47,17 @@ public class WorkoutIntro extends AppCompatActivity {
         }
         ResultSet result = null;
         try {
-            result = statement.executeQuery("select * from Programs  where ProgramId = "+progId);
+            result = statement.executeQuery("select * from Programs  where ID = "+progId);
         } catch (SQLException e) {
             Log.e("ERROR", e.getMessage());
         }
         try {
             assert result != null;
             while(result.next()){
-                progname.setText(result.getString("ProgramName"));
-                progowner.setText("Author: "+result.getString("ProgramOwner"));
-                ratingtext.setText(result.getString("ProgramRate"));
-                ratingBar.setRating(Float.parseFloat(result.getString("ProgramRate")));
+                progname.setText(result.getString("Title"));
+              //  progowner.setText("Author: "+result.getString("Creator"));
+                ratingtext.setText(result.getString("Rate"));
+                ratingBar.setRating(Float.parseFloat(result.getString("Rate")));
 
             }
         } catch (SQLException e) {
@@ -72,7 +72,7 @@ public class WorkoutIntro extends AppCompatActivity {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Fit4ever";
+            ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Workout";
             conn = DriverManager.getConnection(ConnURL,"efe","e1234567");
             System.out.println("connected");
         } catch (SQLException se) {
@@ -89,7 +89,7 @@ public class WorkoutIntro extends AppCompatActivity {
         SharedPreferences sharedPref = getSharedPreferences("userInfo",Context.MODE_PRIVATE);
         String userId = sharedPref.getString("userId", "");
         try {
-            ResultSet tryWorkoutPurchase= statement.executeQuery("USE [Fit4ever] SELECT * FROM [dbo].[WorkoutsOfUsers] where [UserID] ="+userId+" AND [ProgramId]="+ getIntent().getStringExtra("PROGID"));
+            ResultSet tryWorkoutPurchase= statement.executeQuery("USE [Workout] SELECT * FROM [dbo].[UPRelations] where [UserID] ="+userId+" AND [ProgramId]="+ getIntent().getStringExtra("PROGID"));
             if(!tryWorkoutPurchase.next()){
              statement.executeUpdate(" USE [Fit4ever]\n" +
                      "\n" +
@@ -98,8 +98,7 @@ public class WorkoutIntro extends AppCompatActivity {
                      "           ([WorkoutID]\n" +
                      "           ,[UserID]\n" +
                      "           ,[ProgramId]\n" +
-                     "           ,[EnrollDate]\n" +
-                     "           ,[FinishDate])\n" +
+                     "           ,[RegisteredDate]\n" +
                      "     VALUES\n" +
                      "           (9,"+userId+","+ getIntent().getStringExtra("PROGID")+",'"+Calendar.YEAR+"-"+Calendar.MONTH+"-"+Calendar.DAY_OF_MONTH+"',NULL)\n" +
                      "\n" );
