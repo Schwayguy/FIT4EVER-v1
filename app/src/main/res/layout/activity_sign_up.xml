@@ -30,7 +30,7 @@
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
-                android:layout_height="270dp">
+                android:layout_height="300dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -73,12 +73,19 @@
                     android:text="SURNAME"
                     android:id="@+id/textView11"
                     android:layout_marginTop="23dp" />
+
+                <TextView
+                    android:text="PHONE"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView21"
+                    android:layout_marginTop="23dp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="230dp"
-                android:layout_height="270dp">
+                android:layout_height="wrap_content">
 
                 <EditText
                     android:layout_width="match_parent"
@@ -119,6 +126,14 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/surnameSign"
                    android:singleLine="true" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="phone"
+                    android:ems="10"
+                    android:id="@+id/phoneSign"
+                    android:maxLines="11" />
             </LinearLayout>
         </LinearLayout>
 
@@ -184,11 +199,10 @@
         </LinearLayout>
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="75dp"
             android:layout_height="wrap_content"
             android:text="Signup"
             android:id="@+id/signupButton"
-            android:layout_weight="0"
             android:onClick="signupComplete"
             android:textAllCaps="false"/>
 

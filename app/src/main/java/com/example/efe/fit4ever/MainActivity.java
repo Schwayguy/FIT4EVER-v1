@@ -24,6 +24,7 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -31,6 +32,8 @@ import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.Calendar;
 import java.util.Date;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -146,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("efe", userId);
             try {
                 Statement statement2 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                final ResultSet myworkoutsRes = statement2.executeQuery("SELECT ProgramID FROM UPRelations where UserID =" + userId);
+                final ResultSet myworkoutsRes = statement2.executeQuery("SELECT ProgramID FROM UPRelation where UserID ='" + userId+"'");
                 while (myworkoutsRes.next()) {
                     Button btnWorks = new Button(this);
                     btnWorks.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
@@ -183,11 +186,21 @@ public class MainActivity extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public void logIn(View view) {
+    public void logIn(View view) throws NoSuchAlgorithmException {
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         EditText usernameField = (EditText) findViewById(R.id.usernameField);
         EditText passwordField = (EditText) findViewById(R.id.passwordField);
+
+        String password= passwordField.getText().toString();
+
+        MessageDigest md = MessageDigest.getInstance("SHA-1");
+
+        byte[] result = md.digest(password.getBytes());
+        StringBuffer passbuffer = new StringBuffer();
+        for (int i = 0; i < result.length; i++) {
+            passbuffer.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
+        }
 
         Statement statement = null;
         try {
@@ -197,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         try {
-            ResultSet loginRes = statement.executeQuery("select * from Users where Email ='"+usernameField.getText().toString()+"' AND Password='"+ passwordField.getText().toString()+"'");
+            ResultSet loginRes = statement.executeQuery("select * from Users where Email ='"+usernameField.getText().toString()+"' AND Password='"+ passbuffer.toString()+"'");
             if(!loginRes.next()){
              Toast.makeText(this,"Wrong email or password.",Toast.LENGTH_SHORT).show();
             }else {
