@@ -8,6 +8,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 public class MyWorkout extends AppCompatActivity {
 
     @Override
@@ -25,6 +44,20 @@ public class MyWorkout extends AppCompatActivity {
         //bu fonksiyonu tüm resimler çizildikten sonra çağır
         Bitmap resized = Bitmap.createScaledBitmap(combinedBitmap,(int)(combinedBitmap.getWidth()*0.2), (int)(combinedBitmap.getHeight()*0.2), true);
 
+        File logFile = new File(getExternalFilesDir(null),getIntent().getStringExtra("PROGID") + ".txt");
+        if(!logFile.exists()) {
+            try {
+                FileReader fstream = new FileReader(logFile);
+                BufferedReader myReader= new BufferedReader(fstream);
+                while(!myReader.readLine().isEmpty()){
+                    myReader.skip(1);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         flowchart.setImageBitmap(resized);
     }
 
@@ -32,7 +65,7 @@ public class MyWorkout extends AppCompatActivity {
         Bitmap drawnBitmap = null;
 
         try {
-            drawnBitmap = Bitmap.createBitmap(300, b1Height+b2Height, Bitmap.Config.ARGB_8888);
+            drawnBitmap = Bitmap.createBitmap(400, b1Height+b2Height, Bitmap.Config.ARGB_8888);
 
             Canvas canvas = new Canvas(drawnBitmap);
             // JUST CHANGE TO DIFFERENT Bitmaps and coordinates .

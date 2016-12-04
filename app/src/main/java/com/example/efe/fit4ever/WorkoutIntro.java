@@ -21,6 +21,19 @@ import android.text.format.Time;
 import android.os.StrictMode;
 import android.util.Log;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
@@ -30,7 +43,7 @@ import net.sourceforge.jtds.jdbc.UniqueIdentifier;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -142,42 +155,103 @@ public class WorkoutIntro extends AppCompatActivity {
     public void Download() {
         SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String userId = sharedPref.getString("userId", "");
+        File logFile = new File(getExternalFilesDir(null),getIntent().getStringExtra("PROGID") + ".xls");
 
-        //String filepath = Environment.(Environment.DIRECTORY_DOWNLOADS).toString();
-      //  File logFile = new File(filepath+ "/"+getIntent().getStringExtra("PROGID") + ".txt");
-
-        File logFile = new File(getExternalFilesDir(null),getIntent().getStringExtra("PROGID") + ".txt");
         // şuan her zaman yeni dosya indiriyo sonra düzelt
-        //if(!logFile.exists()){
-            try {
-             logFile.createNewFile();
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-      //  }else{
-      //      Toast.makeText(this,"It already exists.",Toast.LENGTH_LONG).show();
-      //  }
+        if(logFile.exists()){
+            Toast.makeText(this,"It already exists.",Toast.LENGTH_SHORT).show();
+        }
         try {
             ResultSet workoutDownloadInfo = statement.executeQuery("USE [Workout] SELECT  WorkoutID , Name, Information ,Rate, Title ,Subtitle , Period ,Repeat, Queue" +
                     " FROM [dbo].[Workouts] INNER JOIN [dbo].[PWRelation] on [dbo].[Workouts].[ID]=[dbo].[PWRelation].[WorkoutID] AND [ProgramID]='" + getIntent().getStringExtra("PROGID") + "' order by Queue");
-            FileWriter fstream = new FileWriter(logFile);
-            BufferedWriter out = new BufferedWriter(fstream);
+
+            Workbook wb = new HSSFWorkbook();
+            Cell c = null;
+            CellStyle cs = wb.createCellStyle();
+            cs.setFillForegroundColor(HSSFColor.LIME.index);
+            cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+
+            Sheet sheet1 = null;
+            sheet1 = wb.createSheet("Workout Sheet");
+
+            Row headerRow = sheet1.createRow(0);
+
+            c = headerRow .createCell(0);
+            c.setCellValue("WorkoutID");
+            c.setCellStyle(cs);
+
+            c = headerRow .createCell(1);
+            c.setCellValue("Name");
+            c.setCellStyle(cs);
+
+            c = headerRow .createCell(2);
+            c.setCellValue("Information");
+            c.setCellStyle(cs);
+
+            c = headerRow .createCell(3);
+            c.setCellValue("Rate");
+            c.setCellStyle(cs);
+
+            c = headerRow .createCell(4);
+            c.setCellValue("Title");
+            c.setCellStyle(cs);
+
+            c = headerRow .createCell(5);
+            c.setCellValue("Subtitle");
+            c.setCellStyle(cs);
+
+            c = headerRow .createCell(6);
+            c.setCellValue("Period");
+            c.setCellStyle(cs);
+
+            c = headerRow .createCell(7);
+            c.setCellValue("Repeat");
+            c.setCellStyle(cs);
+
+            c = headerRow .createCell(8);
+            c.setCellValue("Queue");
+            c.setCellStyle(cs);
+
+            sheet1.setColumnWidth(0, (15 * 700));
+            sheet1.setColumnWidth(1, (15 * 500));
+            sheet1.setColumnWidth(2, (15 * 500));
+            sheet1.setColumnWidth(3, (15 * 500));
+            sheet1.setColumnWidth(4, (15 * 500));
+            sheet1.setColumnWidth(5, (15 * 500));
+            sheet1.setColumnWidth(6, (15 * 500));
+            sheet1.setColumnWidth(7, (15 * 500));
+            sheet1.setColumnWidth(8, (15 * 500));
+
+            FileOutputStream os = null;
+            int row =1;
             while (workoutDownloadInfo.next()) {
-                String workoutIDCon =workoutDownloadInfo.getString("WorkoutID");
-            //    Toast.makeText(this,workoutIDCon+" "+Integer.toString(workoutDownloadInfo.getInt("Queue")), Toast.LENGTH_SHORT).show();
-                out.write(workoutDownloadInfo.getString("WorkoutID") + ", ");
-                out.write(workoutDownloadInfo.getString("Name") + ", ");
-                out.write(workoutDownloadInfo.getString("Information") + ", ");
-                out.write(Float.toString(workoutDownloadInfo.getFloat("Rate")) + ", ");
-                out.write(workoutDownloadInfo.getString("Title") + ", ");
-                out.write(workoutDownloadInfo.getString("Subtitle") + ", ");
-                out.write(Integer.toString(workoutDownloadInfo.getInt("Period")) + ", ");
-                out.write(Integer.toString(workoutDownloadInfo.getInt("Repeat")) + ", ");
-                out.write(Integer.toString(workoutDownloadInfo.getInt("Queue")) + ", ");
-                out.newLine();
+                Row dataRow = sheet1.createRow(row);
+
+                c = dataRow.createCell(0);
+                c.setCellValue(workoutDownloadInfo.getString("WorkoutID"));
+                c = dataRow.createCell(1);
+                c.setCellValue(workoutDownloadInfo.getString("Name"));
+                c = dataRow.createCell(2);
+                c.setCellValue(workoutDownloadInfo.getString("Information"));
+                c = dataRow.createCell(3);
+                c.setCellValue(Float.toString(workoutDownloadInfo.getFloat("Rate")));
+                c = dataRow.createCell(4);
+                c.setCellValue(workoutDownloadInfo.getString("Title") );
+                c = dataRow.createCell(5);
+                c.setCellValue(workoutDownloadInfo.getString("Subtitle"));
+                c = dataRow.createCell(6);
+                c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Period")));
+                c = dataRow.createCell(7);
+                c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Repeat")) );
+                c = dataRow.createCell(8);
+                c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Queue")));
+                row++;
             }
+                os = new FileOutputStream(logFile);
+                wb.write(os);
+
             Toast.makeText(this, "Download successful.", Toast.LENGTH_SHORT).show();
-            out.close();
+            os.close();
         } catch (SQLException e) {
             Log.e("error download", e.getMessage());
         } catch (IOException e) {
