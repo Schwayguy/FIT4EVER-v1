@@ -218,12 +218,12 @@ public class WorkoutIntro extends AppCompatActivity {
             sheet1.setColumnWidth(3, (15 * 500));
             sheet1.setColumnWidth(4, (15 * 500));
             sheet1.setColumnWidth(5, (15 * 500));
-            sheet1.setColumnWidth(6, (15 * 500));
-            sheet1.setColumnWidth(7, (15 * 500));
-            sheet1.setColumnWidth(8, (15 * 500));
+            sheet1.setColumnWidth(6, (15 * 200));
+            sheet1.setColumnWidth(7, (15 * 200));
+            sheet1.setColumnWidth(8, (15 * 200));
 
             FileOutputStream os = null;
-            int row =1;
+            int row = 1;
             while (workoutDownloadInfo.next()) {
                 Row dataRow = sheet1.createRow(row);
 
