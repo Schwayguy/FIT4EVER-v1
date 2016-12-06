@@ -10,6 +10,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.efe.fit4ever.MyWorkout">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
 
     <TextView
         android:layout_width="fill_parent"
@@ -40,8 +47,11 @@
         android:layout_below="@+id/textView14"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
+        android:layout_marginLeft="440dp"
+        android:layout_marginStart="40dp"
         android:layout_marginTop="24dp"
         android:id="@+id/flowchart" />
+
+    </LinearLayout>
+    </ScrollView>
 </RelativeLayout>
