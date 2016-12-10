@@ -159,7 +159,7 @@ public class MyWorkout extends AppCompatActivity {
                     canvas2.drawText(cell3.toString() + " x ", 0, (float) ((280 + (564 * 0.6) * (i - 2))), paint);
                     canvas2.drawText("Rest", 200, (float) ((360 + (564 * 0.6) * (i - 2))), paint);
 
-                    //video adresini değiştir
+                    //video adresini değiştir ve buttonlara onclicklistener ekle
                     Bitmap thumb = ThumbnailUtils.createVideoThumbnail("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/1479662732648.webm",
                             MediaStore.Video.Thumbnails.MINI_KIND);
                     thumb = Bitmap.createScaledBitmap(thumb, (int) (thumb.getWidth() ), (int) (thumb.getHeight() ), true);

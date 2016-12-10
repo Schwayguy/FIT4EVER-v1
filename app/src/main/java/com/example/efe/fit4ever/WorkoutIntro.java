@@ -69,10 +69,12 @@ public class WorkoutIntro extends AppCompatActivity {
         Intent intent = getIntent();
         String progId = intent.getStringExtra("PROGID");
         CONN();
-        TextView progname = (TextView) findViewById(R.id.progNameText);
+        TextView progTitle = (TextView) findViewById(R.id.progTitleText);
         TextView progowner = (TextView) findViewById(R.id.progOwnerText);
         TextView ratingtext = (TextView) findViewById(R.id.ratingText1);
         RatingBar ratingBar = (RatingBar) findViewById(R.id.ratingBar1);
+        TextView description = (TextView) findViewById(R.id.description);
+        TextView subtitle = (TextView) findViewById(R.id.progSubtitleText);
         try {
             statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                     ResultSet.CONCUR_UPDATABLE);
@@ -88,11 +90,12 @@ public class WorkoutIntro extends AppCompatActivity {
         try {
             assert result != null;
             while (result.next()) {
-                progname.setText(result.getString("Title"));
+                progTitle.setText(result.getString("Title"));
                 //  progowner.setText("Author: "+result.getString("Creator"));
                 ratingtext.setText(result.getString("Rate"));
                 ratingBar.setRating(Float.parseFloat(result.getString("Rate")));
-
+                description.setText(result.getString("Information"));
+                subtitle.setText(result.getString("Subtitle"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

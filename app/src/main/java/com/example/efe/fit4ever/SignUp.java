@@ -3,6 +3,7 @@ package com.example.efe.fit4ever;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.net.Uri;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.Time;
@@ -21,9 +22,19 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Calendar;
+import java.util.UUID;
 
 public class SignUp extends AppCompatActivity {
+    Connection conn;
+    Statement statement = null;
     Button btn;
     int yearx, monthx, dayx;
     static final int DIALOG_ID = 0;
@@ -42,6 +53,13 @@ public class SignUp extends AppCompatActivity {
         yearx = cal.get(Calendar.YEAR);
         monthx = cal.get(Calendar.MONTH);
         dayx = cal.get(Calendar.DAY_OF_MONTH);
+        CONN();
+        try {
+            statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                    ResultSet.CONCUR_UPDATABLE);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         showDialogOnButtonClick();
         Spinner spinner;
@@ -87,7 +105,7 @@ public class SignUp extends AppCompatActivity {
     };
 
 
-    public void signupComplete(View view) {
+    public void signupComplete(View view) throws NoSuchAlgorithmException {
         EditText username = (EditText) findViewById(R.id.usernameSign);
         EditText password = (EditText) findViewById(R.id.passwordSign);
         EditText passwordR = (EditText) findViewById(R.id.passwordRSign);
@@ -99,6 +117,7 @@ public class SignUp extends AppCompatActivity {
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         String gender = spinner.getSelectedItem().toString();
         EditText phone = (EditText) findViewById(R.id.phoneSign);
+
         if ((username.getText().toString().isEmpty()) || (password.getText().toString().isEmpty()) || (passwordR.getText().toString().isEmpty())
                 || (email.getText().toString().isEmpty()) || (name.getText().toString().isEmpty()) || (surname.getText().toString().isEmpty())
                 || (height.getText().toString().isEmpty()) || (weight.getText().toString().isEmpty())|| (phone.getText().toString().isEmpty())) {
@@ -134,13 +153,59 @@ public class SignUp extends AppCompatActivity {
                 passwordR.setError("Password mismatch");
             }
 
-            //password, username, email uzunluğu belirle
-
 
         } else {
             Time creationDate = new Time(Time.getCurrentTimezone());
             creationDate.setToNow();
-            //signupu gerçekleştir
+
+            String  uniqueID = UUID.randomUUID().toString();
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] result = md.digest(password.getText().toString().getBytes());
+            StringBuffer passbuffer = new StringBuffer();
+            for (int i = 0; i < result.length; i++) {
+                passbuffer.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
+            }
+
+            ResultSet checkUserNameandEmail = null;
+            try {
+                checkUserNameandEmail = statement.executeQuery("USE [Workout] SELECT * FROM [dbo].[Users] where [Username] ='" + username.getText().toString() + "' OR [Email]='" + email.getText().toString() + "'");
+
+                if (!checkUserNameandEmail.next()) {
+                    int genderNo;
+                    if(gender.equals("Male")){
+                        genderNo=0;
+                    }else{genderNo=1;}
+
+                    statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[Users] ([ID]\n" +
+                            "      ,[Username]\n" +
+                            "      ,[Password]\n" +
+                            "      ,[Email]\n" +
+                            "      ,[Name]\n" +
+                            "      ,[Surname]\n" +
+                            "      ,[Birthdate]\n" +
+                            "      ,[Gender]\n" +
+                            "      ,[IsActive]\n" +
+                            "      ,[CreationDate]\n" +
+                            "      ,[Role]\n" +
+                            "      ,[Phone]\n" +
+                            "      ,[Height]\n" +
+                            "      ,[Weight]\n" +
+                            "      ,[ViewCount]) VALUES" +
+                            " ('" + uniqueID + "','" + username.getText().toString() + "','" + passbuffer.toString() + "','" + email.getText().toString() +
+                            "','" + name.getText().toString() + "','" +  surname.getText().toString() + "','"  + yearx  + "- " + monthx + "- " + dayx +"','"+  genderNo + "','"  + 1 + "','"
+                            + Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DAY_OF_MONTH + "','" + 1 + "','" + phone.getText().toString() + "','"+ height.getText().toString() + "','"
+                            + weight.getText().toString() + "','" + 0 +"')");
+                    Toast.makeText(this, "Signup complete.", Toast.LENGTH_SHORT).show();
+
+                    finish();
+
+
+                } else {
+                    Toast.makeText(this, "Please try another username or email.", Toast.LENGTH_SHORT).show();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -181,4 +246,25 @@ public class SignUp extends AppCompatActivity {
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
+    public Connection CONN() {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        conn = null;
+        String ConnURL;
+
+        try {
+            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Workout";
+            conn = DriverManager.getConnection(ConnURL, "efe", "e1234567");
+            System.out.println("connected");
+        } catch (SQLException se) {
+            Log.e("ERROr1", se.getMessage());
+        } catch (ClassNotFoundException e) {
+            Log.e("ERROr2", e.getMessage());
+        } catch (Exception e) {
+            Toast.makeText(this, "Something went wrong while trying to connect to the database, please check your internet connection.", Toast.LENGTH_LONG).show();
+        }
+        return conn;
+    }
 }
+
