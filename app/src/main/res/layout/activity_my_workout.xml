@@ -19,7 +19,7 @@
         android:orientation="vertical"
         android:id="@+id/flowchartLayout">
 
-    <TextView
+        <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
@@ -57,9 +57,16 @@
             android:layout_marginStart="40dp"
             android:layout_marginTop="24dp"
             android:id="@+id/flowchart" />
+
         </FrameLayout>
 
-
+        <Button
+            android:text="START"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/startButton" />
     </LinearLayout>
+
     </ScrollView>
+
 </RelativeLayout>

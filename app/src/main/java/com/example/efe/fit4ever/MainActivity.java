@@ -3,6 +3,8 @@ package com.example.efe.fit4ever;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -53,21 +55,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        CONN();
-        Statement statement = null;
-        try {
-            statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo i = conMgr.getActiveNetworkInfo();
         ResultSet result = null;
-        try {
-            result = statement.executeQuery("select * from Programs ");
-        } catch (SQLException e) {
-            Log.e("ERROR", e.getMessage());
-        }
+        Statement statement = null;
+       // if (i == null) {
+            CONN();
+            try {
+                statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                        ResultSet.CONCUR_UPDATABLE);
+            } catch (SQLException e) {
+                e.printStackTrace();            }
 
+            try {
+                result = statement.executeQuery("select * from Programs ");
+            } catch (SQLException e) {
+                Log.e("ERROR", e.getMessage());
+            }
+       // }else{
+         //   Toast.makeText(this,"Starting in offline mode.",Toast.LENGTH_SHORT).show();
+        //}
         TabHost pencere = (TabHost) findViewById(R.id.tabHost);
         pencere.setup();
 

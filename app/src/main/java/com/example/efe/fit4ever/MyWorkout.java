@@ -1,6 +1,7 @@
 package com.example.efe.fit4ever;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -17,6 +18,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -66,6 +69,18 @@ public class MyWorkout extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_workout);
+
+        Button btnPlay = (Button) findViewById(R.id.startButton);
+        btnPlay.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                Intent intent = new Intent(getBaseContext(), PlayWorkout.class);
+                intent.putExtra("PROGID",  getIntent().getStringExtra("PROGID"));
+                startActivity(intent);
+                finish();
+
+            }
+        });
 
         ImageView flowchart = (ImageView) findViewById(R.id.flowchart);
         Bitmap circle = BitmapFactory.decodeResource(getResources(), R.drawable.circle);
@@ -145,6 +160,8 @@ public class MyWorkout extends AppCompatActivity {
                     Cell cell4 = row.getCell(repeatRef.getCol());
                     Log.d("try", "cell Value: " + cell1.toString() + " " + cell2.toString() + " " + cell3.toString() + " " + cell4.toString());
 
+                    float newx = resized.getWidth();
+                    float newy = resized.getHeight();
 
                     resized = resized.copy(Bitmap.Config.ARGB_8888, true);
                     Canvas canvas2 = new Canvas(resized);
@@ -155,21 +172,21 @@ public class MyWorkout extends AppCompatActivity {
                     paint.setTextSize((int) 32);
                     // text shadow
                     paint.setShadowLayer(1f, 0f, 1f, Color.BLACK);
-                    canvas2.drawText(cell2.toString() + " x " + cell4.toString(), 260, (float) ((280 + (564 * 0.6) * (i - 2))), paint);
-                    canvas2.drawText(cell3.toString() + " x ", 0, (float) ((280 + (564 * 0.6) * (i - 2))), paint);
-                    canvas2.drawText("Rest", 200, (float) ((360 + (564 * 0.6) * (i - 2))), paint);
+                    canvas2.drawText(cell2.toString() + " x " + cell4.toString(), (float) (newx*0.46), (float) (((newy*0.18) + (newy * 0.215) * (i - 2))), paint);
+                    canvas2.drawText(cell3.toString() + " x ", 0, (float) (((newy*0.18) + (newy * 0.215) * (i - 2))), paint);
+                    canvas2.drawText("Rest", (float) (newx*0.4), (float) (((newy*0.24) + (newy * 0.215) * (i - 2))), paint);
 
                     //video adresini değiştir ve buttonlara onclicklistener ekle
-                    Bitmap thumb = ThumbnailUtils.createVideoThumbnail("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/1479662732648.webm",
+                    Bitmap thumb = ThumbnailUtils.createVideoThumbnail("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4",
                             MediaStore.Video.Thumbnails.MINI_KIND);
                     thumb = Bitmap.createScaledBitmap(thumb, (int) (thumb.getWidth() ), (int) (thumb.getHeight() ), true);
                     ImageButton btn = new ImageButton(this);
-                    btn.setLayoutParams(new ScrollView.LayoutParams(144,108));
+                    btn.setLayoutParams(new ScrollView.LayoutParams(144,108));//sınırları yüzdeli belirle
                     Drawable background = new BitmapDrawable(getResources(), thumb);
                     btn.setBackground(background);
                     btn.bringToFront();
-                    btn.setY((float) (290 + (564 * 0.6) * (i - 2)));
-                    btn.setX(220);
+                    btn.setY((float) ((newy*0.185) + (newy * 0.215) * (i - 2)));
+                    btn.setX((float) (newx*0.37));
                     layout.addView(btn);
                     flowchart.setImageBitmap(resized);
                 }
