@@ -58,7 +58,9 @@
             android:layout_marginTop="24dp"
             android:id="@+id/flowchart" />
 
+
         </FrameLayout>
+
 
         <Button
             android:text="START"
@@ -66,6 +68,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/startButton" />
     </LinearLayout>
+
 
     </ScrollView>
 

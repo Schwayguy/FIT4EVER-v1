@@ -17,7 +17,7 @@
 
         <VideoView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="245dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
@@ -30,7 +30,7 @@
             android:id="@+id/workoutName" />
 
         <Button
-            android:text="Button"
+            android:text="Next"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/buttonNext" />

@@ -77,7 +77,6 @@ public class MyWorkout extends AppCompatActivity {
                 Intent intent = new Intent(getBaseContext(), PlayWorkout.class);
                 intent.putExtra("PROGID",  getIntent().getStringExtra("PROGID"));
                 startActivity(intent);
-                finish();
 
             }
         });
@@ -172,21 +171,21 @@ public class MyWorkout extends AppCompatActivity {
                     paint.setTextSize((int) 32);
                     // text shadow
                     paint.setShadowLayer(1f, 0f, 1f, Color.BLACK);
-                    canvas2.drawText(cell2.toString() + " x " + cell4.toString(), (float) (newx*0.46), (float) (((newy*0.18) + (newy * 0.215) * (i - 2))), paint);
+                    canvas2.drawText(cell2.toString() + " x " + cell4.toString(), (float) (newx*0.65), (float) (((newy*0.18) + (newy * 0.215) * (i - 2))), paint);
                     canvas2.drawText(cell3.toString() + " x ", 0, (float) (((newy*0.18) + (newy * 0.215) * (i - 2))), paint);
-                    canvas2.drawText("Rest", (float) (newx*0.4), (float) (((newy*0.24) + (newy * 0.215) * (i - 2))), paint);
+                    canvas2.drawText("Rest", (float) (newx*0.45), (float) (((newy*0.24) + (newy * 0.215) * (i - 2))), paint);
 
                     //video adresini değiştir ve buttonlara onclicklistener ekle
                     Bitmap thumb = ThumbnailUtils.createVideoThumbnail("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4",
                             MediaStore.Video.Thumbnails.MINI_KIND);
                     thumb = Bitmap.createScaledBitmap(thumb, (int) (thumb.getWidth() ), (int) (thumb.getHeight() ), true);
                     ImageButton btn = new ImageButton(this);
-                    btn.setLayoutParams(new ScrollView.LayoutParams(144,108));//sınırları yüzdeli belirle
+                    btn.setLayoutParams(new ScrollView.LayoutParams((int) (newx*0.36), (int) (newx*0.27)));//sınırları yüzdeli belirle
                     Drawable background = new BitmapDrawable(getResources(), thumb);
                     btn.setBackground(background);
                     btn.bringToFront();
                     btn.setY((float) ((newy*0.185) + (newy * 0.215) * (i - 2)));
-                    btn.setX((float) (newx*0.37));
+                    btn.setX((float) (newx*0.5));
                     layout.addView(btn);
                     flowchart.setImageBitmap(resized);
                 }

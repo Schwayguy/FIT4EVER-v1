@@ -31,6 +31,10 @@
         <activity
             android:name=".WorkoutIntro"
             android:screenOrientation="portrait" />
+        <activity android:name=".MyWorkout"
+            android:screenOrientation="portrait" />
+        <activity android:name=".PlayWorkout"
+            android:screenOrientation="portrait" />
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -39,8 +43,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".MyWorkout" />
-        <activity android:name=".PlayWorkout"></activity>
+
     </application>
 
 </manifest>

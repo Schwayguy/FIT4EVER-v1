@@ -56,10 +56,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo i = conMgr.getActiveNetworkInfo();
+        NetworkInfo inet = conMgr.getActiveNetworkInfo();
         ResultSet result = null;
         Statement statement = null;
-       // if (i == null) {
+        if (inet != null) {
             CONN();
             try {
                 statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
@@ -72,9 +72,9 @@ public class MainActivity extends AppCompatActivity {
             } catch (SQLException e) {
                 Log.e("ERROR", e.getMessage());
             }
-       // }else{
-         //   Toast.makeText(this,"Starting in offline mode.",Toast.LENGTH_SHORT).show();
-        //}
+        }else{
+            Toast.makeText(this,"Starting in offline mode.",Toast.LENGTH_SHORT).show();
+        }
         TabHost pencere = (TabHost) findViewById(R.id.tabHost);
         pencere.setup();
 
@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
         pencere.setCurrentTab(0);
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.workouts);
+        if(inet!=null)
         try {
             result.beforeFirst();
             while (result.next()) {
@@ -199,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
         EditText usernameField = (EditText) findViewById(R.id.usernameField);
         EditText passwordField = (EditText) findViewById(R.id.passwordField);
 
+
         String password= passwordField.getText().toString();
 
         MessageDigest md = MessageDigest.getInstance("SHA-1");
@@ -208,31 +210,37 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < result.length; i++) {
             passbuffer.append(Integer.toString((result[i] & 0xff) + 0x100, 16).substring(1));
         }
+        ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo inet = conMgr.getActiveNetworkInfo();
+        if (inet != null) {
 
-        Statement statement = null;
-        try {
-            statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+            Statement statement = null;
+         try {
+              statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                     ResultSet.CONCUR_UPDATABLE);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        try {
-            ResultSet loginRes = statement.executeQuery("select * from Users where Email ='"+usernameField.getText().toString()+"' AND Password='"+ passbuffer.toString()+"'");
-            if(!loginRes.next()){
-             Toast.makeText(this,"Wrong email or password.",Toast.LENGTH_SHORT).show();
-            }else {
-                editor.putString("lastLoginDate", Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DAY_OF_MONTH);
-                editor.putString("userId", loginRes.getString("ID"));
-                editor.putString("email", usernameField.getText().toString());
-                editor.putString("password", passwordField.getText().toString());
-                editor.apply();
-                finish();
-                startActivity(getIntent());
+         } catch (SQLException e) {
+              e.printStackTrace();
+           }
+            try {
+             ResultSet loginRes = statement.executeQuery("select * from Users where Email ='"+usernameField.getText().toString()+"' AND Password='"+ passbuffer.toString()+"'");
+             if(!loginRes.next()){
+              Toast.makeText(this,"Wrong email or password.",Toast.LENGTH_SHORT).show();
+             }else {
+                  editor.putString("lastLoginDate", Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DAY_OF_MONTH);
+                  editor.putString("userId", loginRes.getString("ID"));
+                  editor.putString("email", usernameField.getText().toString());
+                  editor.putString("password", passwordField.getText().toString());
+                  editor.apply();
+                  finish();
+                  startActivity(getIntent());
+                  displayData(view);
+             }
+         } catch (SQLException e) {
+             Log.e("ERROR", e.getMessage());
+             Toast.makeText(this,"You need internet connection to login.",Toast.LENGTH_SHORT).show();
+         }
+        }else{
 
-                displayData(view);
-            }
-        } catch (SQLException e) {
-            Log.e("ERROR", e.getMessage());
         }
 
     }
@@ -287,8 +295,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startSignUp(View view) {
-        Intent intent = new Intent(view.getContext(), SignUp.class);
-        startActivityForResult(intent, 0);
+        ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo inet = conMgr.getActiveNetworkInfo();
+        if (inet != null) {
+            Intent intent = new Intent(view.getContext(), SignUp.class);
+            startActivityForResult(intent, 0);
+        }else{
+            Toast.makeText(this,"You need internet connection to signup.",Toast.LENGTH_SHORT).show();
+        }
     }
 
     public Connection CONN() {
