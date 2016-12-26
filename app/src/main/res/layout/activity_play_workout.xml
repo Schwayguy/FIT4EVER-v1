@@ -27,13 +27,34 @@
             android:text="TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/workoutName" />
+            android:id="@+id/workoutName"
+            android:gravity="center_horizontal"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="20sp"
+            android:layout_marginTop="10dp" />
 
-        <Button
-            android:text="Next"
+        <TextView
+            android:text="TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/buttonNext" />
+            android:id="@+id/workoutinfo"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:id="@+id/repcount"
+            android:layout_marginTop="20dp" />
+
+        <Button
+            android:text="Next Exercise"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonNext"
+            android:layout_gravity="bottom" />
     </LinearLayout>
 
 </RelativeLayout>

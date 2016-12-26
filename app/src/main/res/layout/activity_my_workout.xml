@@ -10,9 +10,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.efe.fit4ever.MyWorkout">
+
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,10 +45,41 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="15dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rating:"
+                android:id="@+id/textView33" />
+
+            <RatingBar
+                style="?android:attr/ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ratingBar2"
+                android:layout_marginLeft="5dp"
+                android:clickable="false"
+                android:contextClickable="false"
+                android:isIndicator="false" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:id="@+id/ratingText2"
+                android:layout_marginLeft="5dp" />
+        </LinearLayout>
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/flowFrame">
+            android:id="@+id/flowFrame"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
 
             <ImageView
             android:layout_width="wrap_content"
@@ -58,6 +93,13 @@
             android:layout_marginTop="24dp"
             android:id="@+id/flowchart" />
 
+            <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/progowner2"
+                android:layout_gravity="right" />
+
 
         </FrameLayout>
 
@@ -67,6 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/startButton" />
+
     </LinearLayout>
 
 

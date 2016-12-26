@@ -23,7 +23,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:id="@+id/linearLayout4"
         android:layout_below="@+id/linearLayout3"
         android:layout_alignParentLeft="true"
@@ -45,6 +45,24 @@
             android:onClick="Purchase"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true" />
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|fill"
+            android:layout_marginTop="25dp">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:layout_above="@+id/linearLayout4"
+                android:id="@+id/commentslayout1"></LinearLayout>
+
+        </ScrollView>
+
     </LinearLayout>
 
     <LinearLayout
@@ -97,5 +115,6 @@
         android:layout_below="@+id/linearLayout3"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
 
 </RelativeLayout>

@@ -2,6 +2,8 @@ package com.example.efe.fit4ever;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,19 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -43,13 +58,12 @@ public class SignUp extends AppCompatActivity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
-
+    Calendar cal = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
-        final Calendar cal = Calendar.getInstance();
         yearx = cal.get(Calendar.YEAR);
         monthx = cal.get(Calendar.MONTH);
         dayx = cal.get(Calendar.DAY_OF_MONTH);
@@ -193,10 +207,55 @@ public class SignUp extends AppCompatActivity {
                             "      ,[ViewCount]) VALUES" +
                             " ('" + uniqueID + "','" + username.getText().toString() + "','" + passbuffer.toString() + "','" + email.getText().toString() +
                             "','" + name.getText().toString() + "','" +  surname.getText().toString() + "','"  + yearx  + "- " + monthx + "- " + dayx +"','"+  genderNo + "','"  + 1 + "','"
-                            + Calendar.YEAR + "-" + Calendar.MONTH + "-" + Calendar.DAY_OF_MONTH + "','" + 1 + "','" + phone.getText().toString() + "','"+ height.getText().toString() + "','"
+                            + cal.get(Calendar.YEAR) + "-" + String.valueOf(cal.get(Calendar.MONTH)+1) + "-" + cal.get(Calendar.DAY_OF_MONTH) + "','" + 1 + "','" + phone.getText().toString() + "','"+ height.getText().toString() + "','"
                             + weight.getText().toString() + "','" + 0 +"')");
                     Toast.makeText(this, "Signup complete.", Toast.LENGTH_SHORT).show();
+                    SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("weight", weight.getText().toString());
+                    editor.apply();
 
+
+                    File weightFile = new File(getExternalFilesDir(null),uniqueID + ".xls");
+
+
+                    Workbook wb = new HSSFWorkbook();
+                    Cell c = null;
+                    CellStyle cs = wb.createCellStyle();
+                    cs.setFillForegroundColor(HSSFColor.LIME.index);
+                    cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+
+                    Sheet sheet1 = null;
+                    sheet1 = wb.createSheet("Weight Changes");
+
+                    Row headerRow = sheet1.createRow(0);
+
+                    c = headerRow.createCell(0);
+                    c.setCellValue("WeightLoss");
+                    c.setCellStyle(cs);
+
+                    c = headerRow.createCell(1);
+                    c.setCellValue("RecordDate");
+                    c.setCellStyle(cs);
+
+                    c = headerRow.createCell(2);
+                    c.setCellValue("ProgramID");
+                    c.setCellStyle(cs);
+
+                    c = headerRow.createCell(3);
+                    c.setCellValue("IsSent");
+                    c.setCellStyle(cs);
+
+
+                    sheet1.setColumnWidth(0, (15 * 500));
+                    sheet1.setColumnWidth(1, (15 * 500));
+                    sheet1.setColumnWidth(2, (15 * 500));
+                    sheet1.setColumnWidth(3, (15 * 500));
+
+                    FileOutputStream os = null;
+                    os = new FileOutputStream(weightFile);
+                    wb.write(os);
+                    os.close();
                     finish();
 
 
@@ -204,6 +263,10 @@ public class SignUp extends AppCompatActivity {
                     Toast.makeText(this, "Please try another username or email.", Toast.LENGTH_SHORT).show();
                 }
             } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

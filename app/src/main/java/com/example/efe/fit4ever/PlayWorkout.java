@@ -39,6 +39,7 @@ public class PlayWorkout extends AppCompatActivity {
     private GoogleApiClient client;
     int i ;
     int j ;
+    Cell cell4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,21 +60,29 @@ public class PlayWorkout extends AppCompatActivity {
             j=0;
             CellReference idRef = new CellReference("A" + i);
             CellReference nameRef = new CellReference("B" + i);
-            CellReference infoRef = new CellReference("C" + i);
-            CellReference periodRef = new CellReference("G" + i);
-            CellReference repeatRef = new CellReference("H" + i);
+            CellReference videoRef = new CellReference("C" + i);
+            CellReference infoRef = new CellReference("D" + i);
+            CellReference periodRef = new CellReference("H" + i);
+            CellReference repeatRef = new CellReference("I" + i);
             Row row = mySheet.getRow(idRef.getRow());
             Cell cell1 = row.getCell(idRef.getCol());
             Cell cell2 = row.getCell(nameRef.getCol());
             Cell cell3 = row.getCell(infoRef.getCol());
-            final Cell cell4 = row.getCell(periodRef.getCol());
+            cell4 = row.getCell(periodRef.getCol());
             Cell cell5 = row.getCell(repeatRef.getCol());
+            Cell cell6 = row.getCell(videoRef.getCol());
 
-            TextView workoutName = (TextView)findViewById(R.id.workoutName);
+            TextView workoutName = (TextView) findViewById(R.id.workoutName);
             workoutName.setText(cell2.toString());
 
+            TextView repcount = (TextView) findViewById(R.id.repcount);
+            repcount.setText(cell5.toString());
+
+            TextView workoutInfo = (TextView) findViewById(R.id.workoutinfo);
+            workoutInfo.setText(cell3.toString());
+
             VideoView videoView = (VideoView) findViewById(R.id.videoView);
-            videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4");
+            videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4");//+cell6.toString()
 
             videoView.start();
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -87,6 +96,8 @@ public class PlayWorkout extends AppCompatActivity {
                         if (j >= Integer.parseInt(cell4.toString()) - 1) {
                             j = 0;
                             i++;
+                        } else {
+                            j++;
                             new CountDownTimer(10000, 1000) {
                                 public void onTick(long millisUntilFinished) {
                                     Toast.makeText(getApplicationContext(),"Rest for: " + millisUntilFinished / 1000 +" seconds",Toast.LENGTH_SHORT).show();
@@ -96,8 +107,6 @@ public class PlayWorkout extends AppCompatActivity {
                                     Toast.makeText(getApplicationContext(), "Continue workout", Toast.LENGTH_SHORT).show();
                                 }
                             }.start();
-                        } else {
-                            j++;
                         }
                         Log.d("i degeri", String.valueOf(i));
                         Log.d("j degeri", String.valueOf(j));
@@ -108,21 +117,29 @@ public class PlayWorkout extends AppCompatActivity {
 
                             CellReference idRef = new CellReference("A" + i);
                             CellReference nameRef = new CellReference("B" + i);
-                            CellReference infoRef = new CellReference("C" + i);
-                            CellReference periodRef = new CellReference("G" + i);
-                            CellReference repeatRef = new CellReference("H" + i);
+                            CellReference videoRef = new CellReference("C" + i);
+                            CellReference infoRef = new CellReference("D" + i);
+                            CellReference periodRef = new CellReference("H" + i);
+                            CellReference repeatRef = new CellReference("I" + i);
                             Row row = mySheet.getRow(idRef.getRow());
                             Cell cell1 = row.getCell(idRef.getCol());
                             Cell cell2 = row.getCell(nameRef.getCol());
                             Cell cell3 = row.getCell(infoRef.getCol());
                             Cell cell4 = row.getCell(periodRef.getCol());
                             Cell cell5 = row.getCell(repeatRef.getCol());
+                            Cell cell6 = row.getCell(videoRef.getCol());
 
                             TextView workoutName = (TextView) findViewById(R.id.workoutName);
                             workoutName.setText(cell2.toString());
 
+                            TextView repcount = (TextView) findViewById(R.id.repcount);
+                            repcount.setText(cell5.toString());
+
+                            TextView workoutInfo = (TextView) findViewById(R.id.workoutinfo);
+                            workoutInfo.setText(cell3.toString());
+
                             VideoView videoView = (VideoView) findViewById(R.id.videoView);
-                            videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4");
+                            videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4");//+cell6.toString()
 
                             videoView.start();
                             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {

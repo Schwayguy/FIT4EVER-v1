@@ -133,7 +133,7 @@
                     android:inputType="phone"
                     android:ems="10"
                     android:id="@+id/phoneSign"
-                    android:maxLength="12"
+                    android:maxLength="11"
                     />
             </LinearLayout>
         </LinearLayout>
