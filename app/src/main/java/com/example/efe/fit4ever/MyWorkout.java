@@ -1,6 +1,8 @@
 package com.example.efe.fit4ever;
 
 import android.annotation.TargetApi;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,6 +18,7 @@ import android.media.ThumbnailUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.StrictMode;
 import android.provider.MediaStore;
@@ -63,6 +66,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
@@ -80,6 +85,8 @@ public class MyWorkout extends AppCompatActivity {
      */
     private GoogleApiClient client;
     SharedPreferences sharedPref;
+    ProgressDialog pDialog;
+    public static final int progress_bar_type = 0;
 
     Connection conn;
     Statement statement = null;
@@ -90,15 +97,15 @@ public class MyWorkout extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_workout);
         Intent intent = getIntent();
-        String progId = intent.getStringExtra("PROGID");
-        TextView progTitle = (TextView) findViewById(R.id.title);
+        final String progId = intent.getStringExtra("PROGID");
+        final TextView progTitle = (TextView) findViewById(R.id.title);
         TextView progowner = (TextView) findViewById(R.id.progowner2);
         TextView ratingtext = (TextView) findViewById(R.id.ratingText2);
         RatingBar ratingBar = (RatingBar) findViewById(R.id.ratingBar2);
         TextView description = (TextView) findViewById(R.id.description2);
 
 
-        ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo inet = conMgr.getActiveNetworkInfo();
         if (inet != null) {
             CONN();
@@ -106,7 +113,8 @@ public class MyWorkout extends AppCompatActivity {
                 statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                         ResultSet.CONCUR_UPDATABLE);
             } catch (SQLException e) {
-                e.printStackTrace();            }
+                e.printStackTrace();
+            }
         }
 
         ResultSet result = null;
@@ -120,7 +128,7 @@ public class MyWorkout extends AppCompatActivity {
             assert result != null;
             while (result.next()) {
                 progTitle.setText(result.getString("Title"));
-                progowner.setText("Author: "+result.getString("Name")+" "+result.getString("Surname"));
+                progowner.setText("Author: " + result.getString("Name") + " " + result.getString("Surname"));
                 ratingtext.setText(result.getString("Rate"));
                 ratingBar.setRating(Float.parseFloat(result.getString("Rate")));
                 description.setText(result.getString("Information"));
@@ -134,11 +142,12 @@ public class MyWorkout extends AppCompatActivity {
             public void onClick(View v) {
                 sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("progId",getIntent().getStringExtra("PROGID") );
+                editor.putString("progId", getIntent().getStringExtra("PROGID"));
+                editor.putString("progname", progTitle.getText().toString());
                 editor.apply();
 
                 Intent intent = new Intent(getBaseContext(), PlayWorkout.class);
-                intent.putExtra("PROGID",  getIntent().getStringExtra("PROGID"));
+                intent.putExtra("PROGID", getIntent().getStringExtra("PROGID"));
                 startActivity(intent);
 
             }
@@ -173,15 +182,16 @@ public class MyWorkout extends AppCompatActivity {
                 int rowNumber = mySheet.getPhysicalNumberOfRows();
                 int i;
                 for (i = 2; i <= rowNumber; i++) {
-                    CellReference cellReference = new CellReference("A" + i);
+                    CellReference cellReference = new CellReference("B" + i);
                     Row row = mySheet.getRow(cellReference.getRow());
                     Cell cell = row.getCell(cellReference.getCol());
+                    if (!cell.toString().equals("Rest")) {
+                        Bitmap workout = drawMiddle(vertexTheight, lineheight, vertexBheight, arrowHeight, vertextop, line, vertexbot, arrow);
 
-                    Bitmap workout = drawMiddle(vertexTheight, lineheight, vertexBheight, arrowHeight, vertextop, line, vertexbot, arrow);
-
-                    int workHeight = workout.getHeight();
-                    int combHeight = combinedBitmap.getHeight();
-                    combinedBitmap = drawTwo(combHeight, workHeight, combinedBitmap, workout);
+                        int workHeight = workout.getHeight();
+                        int combHeight = combinedBitmap.getHeight();
+                        combinedBitmap = drawTwo(combHeight, workHeight, combinedBitmap, workout);
+                    }
                 }
 
             } catch (FileNotFoundException e) {
@@ -189,14 +199,14 @@ public class MyWorkout extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }else if(inet != null) {
+        } else if (inet != null) {
             Download();
-        }else{
-            Toast.makeText(this,"You need internet connection to redownload your program.",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "You need internet connection to redownload your program.", Toast.LENGTH_SHORT).show();
         }
         combinedBitmap = drawTwo(combinedBitmap.getHeight(), circleHeight, combinedBitmap, circle);
 
-        Bitmap reDo = Bitmap.createBitmap(2800, combinedBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap reDo = Bitmap.createBitmap(3300, combinedBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(reDo);
         // JUST CHANGE TO DIFFERENT Bitmaps and coordinates .
@@ -213,7 +223,8 @@ public class MyWorkout extends AppCompatActivity {
                 HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
                 HSSFSheet mySheet = myWorkBook.getSheetAt(0);
                 int rowNumber = mySheet.getPhysicalNumberOfRows();
-                int i;
+                int i = 0;
+                int j = 2;
                 for (i = 2; i <= rowNumber; i++) {
                     CellReference idRef = new CellReference("A" + i);
                     CellReference nameRef = new CellReference("B" + i);
@@ -225,7 +236,7 @@ public class MyWorkout extends AppCompatActivity {
                     Cell cell2 = row.getCell(nameRef.getCol());
                     Cell cell3 = row.getCell(periodRef.getCol());
                     Cell cell4 = row.getCell(repeatRef.getCol());
-                    Cell cell5 = row.getCell(videoRef.getCol());
+                    final Cell cell5 = row.getCell(videoRef.getCol());
                     Log.d("try", "cell Value: " + cell1.toString() + " " + cell2.toString() + " " + cell3.toString() + " " + cell4.toString());
 
                     float newx = resized.getWidth();
@@ -239,47 +250,79 @@ public class MyWorkout extends AppCompatActivity {
                     paint.setTextSize((int) 32);
                     // text shadow
                     paint.setShadowLayer(1f, 0f, 1f, Color.BLACK);
-                    canvas2.drawText(cell2.toString() + " x " + cell4.toString(), (float) (newx*0.65), (float) (((newx*0.65) + (newx * 0.8) * (i - 2))), paint);
-                    canvas2.drawText(cell3.toString() + " x ", 0, (float) (((newx*0.65) + (newx * 0.8) * (i - 2))), paint);
-                    canvas2.drawText("Rest", (float) (newx*0.45), (float) (((newx*0.9) + (newx * 0.8) * (i - 2))), paint);
 
-                    //video adresini değiştir ve buttonlara onclicklistener ekle
+                    if (cell2.toString().equals("Rest")) {
+                        canvas2.drawText(cell2.toString() + " for " + cell4.toString() + " seconds", (float) (newx * 0.4), (float) (((newx * 0.8) + (newx * 0.685) * (i - 3))), paint);
+                    } else {
+                        if (Float.parseFloat(cell4.toString()) < 30) {
+                            canvas2.drawText(cell2.toString() + " x " + cell4.toString(), (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                        } else {
+                            if (Float.parseFloat(cell4.toString()) >= 60) {
+                                int minute = (int) (Float.parseFloat(cell4.toString()) / 60);
+                                int seconds = (int) (Float.parseFloat(cell4.toString()) % 60);
 
+                                canvas2.drawText(cell2.toString() + " for " +minute + ":" + seconds , (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                            } else {
+                                canvas2.drawText(cell2.toString() + " for " +"00:" + cell4.toString()  , (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                            }
+                        }
+                            if (Float.parseFloat(cell3.toString()) < 30) {
+                                canvas2.drawText(cell3.toString() + " x ", 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                            } else {
+                                if (Float.parseFloat(cell3.toString()) >= 60) {
+                                    int minute = (int) (Float.parseFloat(cell3.toString()) / 60);
+                                    int seconds = (int) (Float.parseFloat(cell3.toString()) % 60);
+                                    canvas2.drawText(minute + ":" + seconds , 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                } else {
+                                    canvas2.drawText("00:" + cell3.toString() , 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                }
+                            }
 
-                    Bitmap thumb = ThumbnailUtils.createVideoThumbnail("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4",
-                            MediaStore.Video.Thumbnails.MINI_KIND);  //+cell5.toString()
-                    thumb = Bitmap.createScaledBitmap(thumb, (int) (thumb.getWidth() ), (int) (thumb.getHeight() ), true);
-                    ImageButton btn = new ImageButton(this);
-                    btn.setLayoutParams(new ScrollView.LayoutParams((int) (newx*0.36), (int) (newx*0.27)));//sınırları yüzdeli belirle
-                    Drawable background = new BitmapDrawable(getResources(), thumb);
-                    btn.setBackground(background);
-                    btn.bringToFront();
-                    btn.setY((float) ((newx*0.7) + (newx * 0.8) * (i - 2)));
-                    btn.setX((float) (newx*0.5));
-                    layout.addView(btn);
-                    flowchart.setImageBitmap(resized);
+                        Bitmap thumb = ThumbnailUtils.createVideoThumbnail("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4",
+                                MediaStore.Video.Thumbnails.MINI_KIND);  //+cell5.toString()
+                        thumb = Bitmap.createScaledBitmap(thumb, (int) (thumb.getWidth()), (int) (thumb.getHeight()), true);
+                        ImageButton btn = new ImageButton(this);
+                        btn.setLayoutParams(new ScrollView.LayoutParams((int) (newx * 0.36), (int) (newx * 0.27)));//sınırları yüzdeli belirle
+                        Drawable background = new BitmapDrawable(getResources(), thumb);
+                        btn.setBackground(background);
+                        btn.bringToFront();
+                        btn.setY((float) ((newx * 0.575) + (newx * 0.685) * (j - 2)));
+                        btn.setX((float) (newx * 0.4));
+                        final String finalI =String.valueOf(i);
+                        btn.setOnClickListener(new View.OnClickListener() {
+                            public void onClick(View v) {
+
+                                Intent intent = new Intent(getBaseContext(), ShowWorkout.class);
+                                intent.putExtra("PROGID", progId);
+                                intent.putExtra("WORKOUTID",cell5.toString());
+                                intent.putExtra("ROWID", finalI);
+                                startActivity(intent);
+
+                            }
+                        });
+                        layout.addView(btn);
+                        flowchart.setImageBitmap(resized);
+                        j++;
+                    }
+
                 }
-
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+
+            // ATTENTION: This was auto-generated to implement the App Indexing API.
+            // See https://g.co/AppIndexing/AndroidStudio for more information.
+            client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
         }
-
-
-
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
-
     public Bitmap drawTwo(int b1Height, int b2Height, Bitmap b1, Bitmap b2) {
         Bitmap drawnBitmap = null;
 
         try {
-            drawnBitmap = Bitmap.createBitmap(2500, b1Height + b2Height, Bitmap.Config.ARGB_8888);
+            drawnBitmap = Bitmap.createBitmap(3000, b1Height + b2Height, Bitmap.Config.ARGB_8888);
 
             Canvas canvas = new Canvas(drawnBitmap);
             // JUST CHANGE TO DIFFERENT Bitmaps and coordinates .
@@ -296,7 +339,7 @@ public class MyWorkout extends AppCompatActivity {
         Bitmap drawnBitmap = null;
 
         try {
-            drawnBitmap = Bitmap.createBitmap(2500, b1Height + b2Height + b3Height + b4Height, Bitmap.Config.ARGB_8888);
+            drawnBitmap = Bitmap.createBitmap(3000, b1Height + b2Height + b3Height + b4Height, Bitmap.Config.ARGB_8888);
 
             Canvas canvas = new Canvas(drawnBitmap);
             // JUST CHANGE TO DIFFERENT Bitmaps and coordinates .
@@ -436,14 +479,30 @@ public class MyWorkout extends AppCompatActivity {
                     c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Queue")));
 
                     Log.d("video", workoutDownloadInfo.getString("Video"));
-/*
-                URL url = new URL("file://212.252.141.117/Users/efe/Desktop/bitirmeVers_4/Workout.Web/Assets/Videos/"+workoutDownloadInfo.getString("Video"));
+
+                String url = "http://fit4ever.cloudapp.net/Assets/Videos/0ee7c111-5e94-4c51-8933-0e3f8fcd1a5d.mp4";
+                    new DownloadFileFromURL().execute(url);
+                    File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/","1.mp4");
+                    File to = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
+                    if(from.exists())
+                        from.renameTo(to);/*
+
 
                 //Open a connection to that URL.
-                URLConnection ucon = url.openConnection();
+                    HttpURLConnection con =  (HttpURLConnection) new URL(url).openConnection();
+
+                    if(con.getResponseCode() == HttpURLConnection.HTTP_OK){
+
+                        Log.d("","File exist!");
+
+                    }else{
+
+                        Log.d("","File does not exist!");
+
+                    }
 
                 File file = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
-                InputStream is = ucon.getInputStream();
+                InputStream is = con.getInputStream();
                 BufferedInputStream inStream = new BufferedInputStream(is, 1024 * 5);
                 FileOutputStream outStream = new FileOutputStream(file);
                 byte[] buff = new byte[5 * 1024];
@@ -458,15 +517,19 @@ public class MyWorkout extends AppCompatActivity {
                 //clean up
                 outStream.flush();
                 outStream.close();
-                inStream.close();*/
-
+                inStream.close();
+*/
                     row++;
                 }
                 os = new FileOutputStream(logFile);
                 wb.write(os);
 
+
+
                 Toast.makeText(this, "Download successful.", Toast.LENGTH_SHORT).show();
                 os.close();
+                finish();
+                startActivity(getIntent());
             } catch (SQLException e) {
                 Log.e("error download", e.getMessage());
             } catch (IOException e) {
@@ -510,5 +573,108 @@ public class MyWorkout extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
+    }
+
+
+    /**
+     * Showing Dialog
+     * */
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case progress_bar_type: // we set this to 0
+                pDialog = new ProgressDialog(this);
+                pDialog.setMessage("Downloading file. Please wait...");
+                pDialog.setIndeterminate(false);
+                pDialog.setMax(100);
+                pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                pDialog.setCancelable(true);
+                pDialog.show();
+                return pDialog;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Background Async Task to download file
+     * */
+    class DownloadFileFromURL extends AsyncTask<String, String, String> {
+
+        /**
+         * Before starting background thread
+         * Show Progress Bar Dialog
+         * */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showDialog(progress_bar_type);
+        }
+
+        /**
+         * Downloading file in background thread
+         * */
+        @Override
+        protected String doInBackground(String... f_url) {
+            int count;
+            try {
+                URL url = new URL(f_url[0]);
+                URLConnection conection = url.openConnection();
+                conection.connect();
+                // this will be useful so that you can show a tipical 0-100% progress bar
+                int lenghtOfFile = conection.getContentLength();
+
+                // download the file
+                InputStream input = new BufferedInputStream(url.openStream(), 8192);
+
+                // Output stream
+                OutputStream output = new FileOutputStream("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/1.mp4");
+
+                byte data[] = new byte[1024];
+
+                long total = 0;
+
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    // publishing the progress....
+                    // After this onProgressUpdate will be called
+                    publishProgress(""+(int)((total*100)/lenghtOfFile));
+
+                    // writing data to file
+                    output.write(data, 0, count);
+                }
+
+                // flushing output
+                output.flush();
+
+                // closing streams
+                output.close();
+                input.close();
+
+            } catch (Exception e) {
+                Log.e("hatalı", e.getMessage());
+            }
+
+            return null;
+        }
+
+        /**
+         * Updating progress bar
+         * */
+        protected void onProgressUpdate(String... progress) {
+            // setting progress percentage
+            pDialog.setProgress(Integer.parseInt(progress[0]));
+        }
+
+        /**
+         * After completing background task
+         * Dismiss the progress dialog
+         * **/
+        @Override
+        protected void onPostExecute(String file_url) {
+            // dismiss the dialog after the file was downloaded
+            dismissDialog(progress_bar_type);
+        }
+
     }
 }

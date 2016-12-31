@@ -1,12 +1,15 @@
 package com.example.efe.fit4ever;
 
 import android.annotation.TargetApi;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v7.app.ActionBar;
@@ -48,10 +51,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import net.sourceforge.jtds.jdbc.UniqueIdentifier;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -67,8 +75,11 @@ public class WorkoutIntro extends AppCompatActivity {
     Connection conn;
     Statement statement = null;
     String userId;
+    String progId;
     EditText usercomment;
     Calendar calendar = Calendar.getInstance();
+    ProgressDialog pDialog;
+    public static final int progress_bar_type = 0;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -82,7 +93,7 @@ public class WorkoutIntro extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workout_intro);
         Intent intent = getIntent();
-        String progId = intent.getStringExtra("PROGID");
+        progId = intent.getStringExtra("PROGID");
         CONN();
         TextView progTitle = (TextView) findViewById(R.id.progTitleText);
         TextView progowner = (TextView) findViewById(R.id.progOwnerText);
@@ -97,6 +108,25 @@ public class WorkoutIntro extends AppCompatActivity {
             e.printStackTrace();
         }
         ResultSet result = null;
+
+        int five,four,three,two,one,addition= 0;
+        float progratevalue = 0;
+        try {
+            result = statement.executeQuery("USE [Workout]  select * from [dbo].[Rates] where [dbo].[Rates].[ID] = '" + progId + "'");
+            if (result.next())
+            {
+                one = Integer.parseInt(result.getString("One"));
+                two = Integer.parseInt(result.getString("Two"));
+                three = Integer.parseInt(result.getString("Three"));
+                four = Integer.parseInt(result.getString("Four"));
+                five = Integer.parseInt(result.getString("Five"));
+                addition = one + two + three + four + five;
+                progratevalue = ((one * 1) + (two * 2) + (three * 3) + (four * 4) + (five * 5)) / addition;
+            }
+
+        } catch (SQLException e) {
+            Log.e("ERRORrate", e.getMessage());
+        }
         try {
             result = statement.executeQuery("select Title, Rate, Information, Subtitle, Name, Surname from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] AND" +
                     "[dbo].[Programs].[ID] = '" + progId + "'");
@@ -116,14 +146,59 @@ public class WorkoutIntro extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        try {
+            statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Programs] SET [dbo].[Programs].[ViewCount]=[dbo].[Programs].[ViewCount]+1" +
+                    " , [dbo].[Programs].[Rate]= "+progratevalue+" WHERE [dbo].[Programs].[ID]='"+progId+"'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         try {
             SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
             userId = sharedPref.getString("userId", "");
             LinearLayout layout = (LinearLayout) findViewById(R.id.commentslayout1);
-            Log.d("çıkmadı",userId);
             ResultSet tryWorkoutOwner = statement.executeQuery("USE [Workout] SELECT * FROM [dbo].[UPRelation] where [UserID] ='" + userId + "' AND [ProgramId]='" + getIntent().getStringExtra("PROGID") + "'");
             if (tryWorkoutOwner.next()) {
-                Log.d("çıkmadı",userId);
+                RatingBar ratingBar2 = new RatingBar(this);
+                ratingBar2.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT));
+                ratingBar2.setMax(5);
+                ratingBar2.setIsIndicator(false);
+                layout.addView(ratingBar2);
+
+                final TextView rateText2 = new TextView(this);
+                rateText2.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT));
+                layout.addView(rateText2);
+
+                ratingBar2.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                    public void onRatingChanged(RatingBar ratingBar2, float rating,
+                                                boolean fromUser) {
+
+                        rateText2.setText(String.valueOf(rating));
+                        String rateColumn = null;
+                        int rateval = (int)rating;
+                        switch (rateval)
+                        {
+                            case 1: {  rateColumn ="One";  Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show();break; }
+                            case 2: {  rateColumn ="Two"; Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show(); break; }
+                            case 3: {  rateColumn ="Three";  Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show();break; }
+                            case 4: {  rateColumn ="Four";  Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show();break; }
+                            case 5: {  rateColumn ="Five"; Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show(); break; }
+
+                        }
+                        try {
+                            statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Rates] SET [dbo].[Rates].["+rateColumn+"]=[dbo].[Rates].["+rateColumn+"]+1 " +
+                                    "WHERE [dbo].[Rates].[ID]='"+progId+"'");
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+                View view2 = new View(this);
+                view2.setBackgroundColor(0xFFC2BEBF);
+                layout.addView(view2, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+
                 usercomment = new EditText(this);
                 usercomment.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, 300));
                 usercomment.setPadding(0,10,0,0);
@@ -295,6 +370,9 @@ public class WorkoutIntro extends AppCompatActivity {
         }else{
             Toast.makeText(this, "You need to login to make purchases.", Toast.LENGTH_SHORT).show();
         }
+
+        Intent intent = new Intent(getBaseContext(),MainActivity.class);
+        startActivity(intent);
     }
 
     public void Download() {
@@ -399,8 +477,13 @@ public class WorkoutIntro extends AppCompatActivity {
                     c = dataRow.createCell(9);
                     c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Queue")));
 
-                /*
-                URL url = new URL("http://192.168.1.23:11124/"+workoutDownloadInfo.getString("Video"));
+
+                    String url = "http://fit4ever.cloudapp.net/Assets/Videos/0ee7c111-5e94-4c51-8933-0e3f8fcd1a5d.mp4";
+                    new WorkoutIntro.DownloadFileFromURL().execute(url);
+                    File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/","1.mp4");
+                    File to = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
+                    if(from.exists())
+                        from.renameTo(to);/*
 
                 //Open a connection to that URL.
                 URLConnection ucon = url.openConnection();
@@ -480,5 +563,104 @@ public class WorkoutIntro extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case progress_bar_type: // we set this to 0
+                pDialog = new ProgressDialog(this);
+                pDialog.setMessage("Downloading file. Please wait...");
+                pDialog.setIndeterminate(false);
+                pDialog.setMax(100);
+                pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                pDialog.setCancelable(true);
+                pDialog.show();
+                return pDialog;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Background Async Task to download file
+     * */
+    class DownloadFileFromURL extends AsyncTask<String, String, String> {
+
+        /**
+         * Before starting background thread
+         * Show Progress Bar Dialog
+         * */
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showDialog(progress_bar_type);
+        }
+
+        /**
+         * Downloading file in background thread
+         * */
+        @Override
+        protected String doInBackground(String... f_url) {
+            int count;
+            try {
+                URL url = new URL(f_url[0]);
+                URLConnection conection = url.openConnection();
+                conection.connect();
+                // this will be useful so that you can show a tipical 0-100% progress bar
+                int lenghtOfFile = conection.getContentLength();
+
+                // download the file
+                InputStream input = new BufferedInputStream(url.openStream(), 8192);
+
+                // Output stream
+                OutputStream output = new FileOutputStream("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/1.mp4");
+
+                byte data[] = new byte[1024];
+
+                long total = 0;
+
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    // publishing the progress....
+                    // After this onProgressUpdate will be called
+                    publishProgress(""+(int)((total*100)/lenghtOfFile));
+
+                    // writing data to file
+                    output.write(data, 0, count);
+                }
+
+                // flushing output
+                output.flush();
+
+                // closing streams
+                output.close();
+                input.close();
+
+            } catch (Exception e) {
+                Log.e("hatalı", e.getMessage());
+            }
+
+            return null;
+        }
+
+        /**
+         * Updating progress bar
+         * */
+        protected void onProgressUpdate(String... progress) {
+            // setting progress percentage
+            pDialog.setProgress(Integer.parseInt(progress[0]));
+        }
+
+        /**
+         * After completing background task
+         * Dismiss the progress dialog
+         * **/
+        @Override
+        protected void onPostExecute(String file_url) {
+            // dismiss the dialog after the file was downloaded
+            dismissDialog(progress_bar_type);
+        }
+
     }
 }

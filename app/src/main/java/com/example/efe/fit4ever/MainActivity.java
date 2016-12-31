@@ -59,6 +59,7 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
     int curWeight;
     EditText weightText;
+    TextView bmiText;
     SharedPreferences sharedPref;
     Connection conn;
     Calendar calendar = Calendar.getInstance();
@@ -120,6 +121,13 @@ public class MainActivity extends AppCompatActivity {
         weightText = (EditText) findViewById(R.id.weightText);
         weightText.setHint(weight);
 
+        String height = sharedPref.getString("height", "");
+        bmiText = (TextView) findViewById(R.id.bmitext);
+        if(!height.isEmpty()) {
+            float bmi = Float.parseFloat(weight) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
+            bmiText.setText("Your current BMI: " + bmi);
+        }
+
         TextView username =(TextView) findViewById(R.id.usernameprofile);
         username.setText( sharedPref.getString("username", ""));
 
@@ -173,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         pencere.setCurrentTab(1);
         layout = (LinearLayout) findViewById(R.id.myWorkout);
 
-        if (!userId.isEmpty()) {
+        if ((!userId.isEmpty())&&(inet!=null)) {
             Log.d("efe", userId);
             try {
                 Statement statement2 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -224,8 +232,8 @@ public class MainActivity extends AppCompatActivity {
                     HSSFSheet mySheet = myWorkBook.getSheetAt(0);
                     int rowNumber = mySheet.getPhysicalNumberOfRows();
                     int i;
-                    for (i = 3; i <= rowNumber+1; i++) {
-                        CellReference cellReference = new CellReference("D" + i);
+                    for (i = 2; i <= rowNumber; i++) {
+                        CellReference cellReference = new CellReference("E" + i);
                         Row row = mySheet.getRow(cellReference.getRow());
                         Cell cell = row.getCell(cellReference.getCol());
                         if (cell.toString().equals("0.0")) {
@@ -305,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
                   editor.putString("email", usernameField.getText().toString());
                   editor.putString("password", passwordField.getText().toString());
                   editor.putString("weight", loginRes.getString("Weight"));
+                  editor.putString("height", loginRes.getString("Height"));
                   editor.apply();
 
 
@@ -334,6 +343,10 @@ public class MainActivity extends AppCompatActivity {
                      c.setCellStyle(cs);
 
                      c = headerRow.createCell(3);
+                     c.setCellValue("ProgramName");
+                     c.setCellStyle(cs);
+
+                     c = headerRow.createCell(4);
                      c.setCellValue("IsSent");
                      c.setCellStyle(cs);
 
@@ -342,13 +355,32 @@ public class MainActivity extends AppCompatActivity {
                      sheet1.setColumnWidth(1, (15 * 500));
                      sheet1.setColumnWidth(2, (15 * 500));
                      sheet1.setColumnWidth(3, (15 * 500));
+                     sheet1.setColumnWidth(4, (15 * 500));
 
+                     ResultSet userHistoryInfo= statement.executeQuery("USE [Workout] SELECT WeightLoss,RecordDate, ProgramID,Title from [UserWeightChangeLog] INNER JOIN [Programs] on UserID='"+loginRes.getString("ID")+"'" +
+                             "and [dbo].[Programs].[ID]=[dbo].[UserWeightChangeLog].[ProgramID] ");
+                     int row = 1;
+                     while (userHistoryInfo.next()) {
+                         Row dataRow = sheet1.createRow(row);
+
+                         c = dataRow.createCell(0);
+                         c.setCellValue(userHistoryInfo.getString("WeightLoss"));
+                         c = dataRow.createCell(1);
+                         c.setCellValue(userHistoryInfo.getString("RecordDate"));
+                         c = dataRow.createCell(2);
+                         c.setCellValue(userHistoryInfo.getString("ProgramID"));
+                         c = dataRow.createCell(3);
+                         c.setCellValue(userHistoryInfo.getString("Title"));
+                         c = dataRow.createCell(4);
+                         c.setCellValue(1);
+                         row++;
+                     }
                      FileOutputStream os = null;
                      os = new FileOutputStream(weightFile);
                      wb.write(os);
 
                  }else{
-                    // Toast.makeText(this,getExternalFilesDir(null).getAbsolutePath(),Toast.LENGTH_SHORT).show();
+                     // Toast.makeText(this,getExternalFilesDir(null).getAbsolutePath(),Toast.LENGTH_SHORT).show();
                  }
 
 
@@ -390,9 +422,16 @@ public class MainActivity extends AppCompatActivity {
         editor.remove("userId");
         editor.remove("username");
         editor.remove("progId");
+        editor.remove("progname");
+        editor.remove("height");
         editor.apply();
         finish();
         startActivity(getIntent());
+    }
+
+    public void SeeHistory(View view){
+        Intent intent = new Intent(getBaseContext(), WorkoutHistory.class);
+        startActivity(intent);
     }
 
     public void setWeight(View view) {
@@ -420,7 +459,7 @@ public class MainActivity extends AppCompatActivity {
                     final int rowNumber = mySheet.getPhysicalNumberOfRows();
                     FileOutputStream os = null;
                     Cell c = null;
-                    Row dataRow = mySheet.createRow(rowNumber + 1);
+                    Row dataRow = mySheet.createRow(rowNumber);
                     c = dataRow.createCell(0);
                     c.setCellValue(wT);
                     c = dataRow.createCell(1);
@@ -428,6 +467,8 @@ public class MainActivity extends AppCompatActivity {
                     c = dataRow.createCell(2);
                     c.setCellValue(sharedPref.getString("progId", ""));
                     c = dataRow.createCell(3);
+                    c.setCellValue(sharedPref.getString("progname", ""));
+                    c = dataRow.createCell(4);
                     c.setCellValue(0);
 
                     os = new FileOutputStream(weightFile);
@@ -450,7 +491,9 @@ public class MainActivity extends AppCompatActivity {
             editor.putString("weight", weightText.getText().toString());
             editor.apply();
 
-            //wieght xls'i bu fonksiyon belirle
+            finish();
+            startActivity(getIntent());
+
         }
     }
 

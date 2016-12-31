@@ -190,14 +190,21 @@
 
                     </LinearLayout>
 
+                    <TextView
+                        android:text="TextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:id="@+id/bmitext" />
+
                     <Button
                         android:layout_width="220dp"
                         android:layout_height="wrap_content"
                         android:text="Workout History"
-                        android:id="@+id/button7"
+                        android:id="@+id/history"
                         android:layout_marginTop="10dp"
                         android:textAllCaps="false"
-                        />
+                        android:onClick="SeeHistory" />
 
                     <Button
                         android:layout_width="wrap_content"

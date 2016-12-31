@@ -1,5 +1,6 @@
 package com.example.efe.fit4ever;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -40,14 +42,18 @@ public class PlayWorkout extends AppCompatActivity {
     int i ;
     int j ;
     Cell cell4;
+    CountDownTimer yourCountDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_workout);
-        Button btnPlay = (Button) findViewById(R.id.buttonNext);
+        final Button btnPlay = (Button) findViewById(R.id.buttonNext);
         File logFile = new File(getExternalFilesDir(null), getIntent().getStringExtra("PROGID") + ".xls");
         FileInputStream myInput = null;
+        final Button start= (Button) findViewById(R.id.buttonstop);
+        final Button stop= (Button) findViewById(R.id.buttonstart);
+
 
         try {
             myInput = new FileInputStream(logFile);
@@ -56,6 +62,8 @@ public class PlayWorkout extends AppCompatActivity {
             HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
             final HSSFSheet mySheet = myWorkBook.getSheetAt(0);
             final int rowNumber = mySheet.getPhysicalNumberOfRows();
+            final SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar2);
+            seekBar.setVisibility(View.INVISIBLE);
             i=2;
             j=0;
             CellReference idRef = new CellReference("A" + i);
@@ -69,14 +77,56 @@ public class PlayWorkout extends AppCompatActivity {
             Cell cell2 = row.getCell(nameRef.getCol());
             Cell cell3 = row.getCell(infoRef.getCol());
             cell4 = row.getCell(periodRef.getCol());
-            Cell cell5 = row.getCell(repeatRef.getCol());
+            final Cell cell5 = row.getCell(repeatRef.getCol());
             Cell cell6 = row.getCell(videoRef.getCol());
 
-            TextView workoutName = (TextView) findViewById(R.id.workoutName);
+            int minute =0;
+            int seconds=0;
+            if(Float.parseFloat(cell5.toString()) > 30) {
+                seekBar.setVisibility(View.VISIBLE);
+                seconds = (int) Float.parseFloat(cell5.toString());
+                if(Float.parseFloat(cell5.toString()) >= 60){
+                    minute = (int) (Float.parseFloat(cell5.toString())/60);
+                    seconds = (int) (Float.parseFloat(cell5.toString())%60);
+                }
+                final TextView repcount = (TextView) findViewById(R.id.repcount);
+                final int finalSeconds = seconds;
+                final int finalMinute = minute;
+                CountDownTimer yourCountDownTimer= new  CountDownTimer((long) (1000 * (Float.parseFloat(cell5.toString()) + 1.0)), 1000) {
+                    int k1 = 0;
+                    int k2=0;
+                    int k3=0;
+                    public void onTick(long millisUntilFinished) {
+                        seekBar.setVisibility(View.VISIBLE);
+                        seekBar.setMax((int) Float.parseFloat(cell5.toString()));
+                        repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                        seekBar.setProgress(k3);
+                        k2++;
+                        k3++;
+                        if(k2==60){
+                            k1++;
+                            k2=0;
+                        }
+                        btnPlay.setClickable(false);
+                    }
+
+                    public void onFinish() {
+                        seekBar.setProgress(k3);
+                        repcount.setText(k1+":"+k2+"                                                                 "+ finalMinute + ":"+ finalSeconds);
+                        btnPlay.setClickable(true);
+                    }
+                }.start();
+            }else {
+
+                TextView repcount = (TextView) findViewById(R.id.repcount);
+                repcount.setText(cell5.toString());
+                seekBar.setVisibility(View.INVISIBLE);
+
+            }
+
+                TextView workoutName = (TextView) findViewById(R.id.workoutName);
             workoutName.setText(cell2.toString());
 
-            TextView repcount = (TextView) findViewById(R.id.repcount);
-            repcount.setText(cell5.toString());
 
             TextView workoutInfo = (TextView) findViewById(R.id.workoutinfo);
             workoutInfo.setText(cell3.toString());
@@ -98,15 +148,6 @@ public class PlayWorkout extends AppCompatActivity {
                             i++;
                         } else {
                             j++;
-                            new CountDownTimer(10000, 1000) {
-                                public void onTick(long millisUntilFinished) {
-                                    Toast.makeText(getApplicationContext(),"Rest for: " + millisUntilFinished / 1000 +" seconds",Toast.LENGTH_SHORT).show();
-                                }
-
-                                public void onFinish() {
-                                    Toast.makeText(getApplicationContext(), "Continue workout", Toast.LENGTH_SHORT).show();
-                                }
-                            }.start();
                         }
                         Log.d("i degeri", String.valueOf(i));
                         Log.d("j degeri", String.valueOf(j));
@@ -125,31 +166,124 @@ public class PlayWorkout extends AppCompatActivity {
                             Cell cell1 = row.getCell(idRef.getCol());
                             Cell cell2 = row.getCell(nameRef.getCol());
                             Cell cell3 = row.getCell(infoRef.getCol());
-                            Cell cell4 = row.getCell(periodRef.getCol());
-                            Cell cell5 = row.getCell(repeatRef.getCol());
+                            final Cell cell4 = row.getCell(periodRef.getCol());
+                            final Cell cell5 = row.getCell(repeatRef.getCol());
                             Cell cell6 = row.getCell(videoRef.getCol());
 
-                            TextView workoutName = (TextView) findViewById(R.id.workoutName);
-                            workoutName.setText(cell2.toString());
-
-                            TextView repcount = (TextView) findViewById(R.id.repcount);
-                            repcount.setText(cell5.toString());
-
-                            TextView workoutInfo = (TextView) findViewById(R.id.workoutinfo);
-                            workoutInfo.setText(cell3.toString());
-
-                            VideoView videoView = (VideoView) findViewById(R.id.videoView);
-                            videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4");//+cell6.toString()
-
-                            videoView.start();
-                            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                @Override
-                                public void onPrepared(MediaPlayer mp) {
-                                    mp.setLooping(true);
+                         if(cell2.toString().equals("Rest")){
+                             yourCountDownTimer =  new CountDownTimer((long) (1000*Float.parseFloat(cell5.toString())), 1000) {
+                                    public void onTick(long millisUntilFinished) {
+                                        Toast.makeText(getApplicationContext(),"Rest for: " + millisUntilFinished / 1000 +" seconds",Toast.LENGTH_SHORT).show();
+                                        btnPlay.setClickable(false);
+                                    }
+                                    public void onFinish() {
+                                        Toast.makeText(getApplicationContext(), "Continue workout", Toast.LENGTH_SHORT).show();
+                                        btnPlay.setClickable(true);
+                                        i++;
+                                    }
+                                }.start();
+                            }else{
+                             int minute =0;
+                             int seconds=0;
+                            if(Float.parseFloat(cell5.toString()) > 30) {
+                                seekBar.setVisibility(View.VISIBLE);
+                                seconds = (int) Float.parseFloat(cell5.toString());
+                                if(Float.parseFloat(cell5.toString()) >= 60){
+                                    minute = (int) (Float.parseFloat(cell5.toString())/60);
+                                    seconds = (int) (Float.parseFloat(cell5.toString())%60);
                                 }
-                            });
+                                final TextView repcount = (TextView) findViewById(R.id.repcount);
+                                final int finalSeconds = seconds;
+                                final int finalMinute = minute;
+                                new CountDownTimer((long) (1000 * (Float.parseFloat(cell5.toString()) + 1.0)), 1000) {
+                                    int k1 = 0;
+                                    int k2=0;
+                                    int k3=0;
+                                    public void onTick(long millisUntilFinished) {
+                                        seekBar.setVisibility(View.VISIBLE);
+                                        seekBar.setMax((int) Float.parseFloat(cell5.toString()));
+                                        repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                                        seekBar.setProgress(k3);
+                                        k2++;
+                                        k3++;
+                                        if(k2==60){
+                                            k1++;
+                                            k2=0;
+                                        }
+                                        btnPlay.setClickable(false);
+                                    }
+
+                                    public void onFinish() {
+                                        seekBar.setProgress(k3);
+                                        repcount.setText(k1+":"+k2+"                                                                 "+ finalMinute + ":"+ finalSeconds);
+                                        btnPlay.setClickable(true);
+                                    }
+                                }.start();
+
+                            }
+                             if(Float.parseFloat(cell4.toString()) > 30) {
+                                 seekBar.setVisibility(View.VISIBLE);
+                                 seconds = (int) Float.parseFloat(cell5.toString());
+                                 if(Float.parseFloat(cell4.toString()) >= 60){
+                                     minute = (int) (Float.parseFloat(cell4.toString())/60);
+                                     seconds = (int) (Float.parseFloat(cell4.toString())%60);
+                                 }
+                                 final TextView repcount = (TextView) findViewById(R.id.repcount);
+                                 final int finalSeconds = seconds;
+                                 final int finalMinute = minute;
+                                 new CountDownTimer((long) (1000 * (Float.parseFloat(cell4.toString()) + 1.0)), 1000) {
+                                     int k1 = 0;
+                                     int k2=0;
+                                     int k3=0;
+                                     public void onTick(long millisUntilFinished) {
+                                         seekBar.setVisibility(View.VISIBLE);
+                                         seekBar.setMax((int) Float.parseFloat(cell4.toString()));
+                                         repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                                         seekBar.setProgress(k3);
+                                         k2++;
+                                         k3++;
+                                         if(k2==60){
+                                             k1++;
+                                             k2=0;
+                                         }
+                                         btnPlay.setClickable(false);
+                                     }
+
+                                     public void onFinish() {
+                                         seekBar.setProgress(k3);
+                                         repcount.setText(k1+":"+k2+"                                                                 "+ finalMinute + ":"+ finalSeconds);
+                                         btnPlay.setClickable(true);
+                                     }
+                                 }.start();
 
 
+
+                             }else {
+
+                                TextView repcount = (TextView) findViewById(R.id.repcount);
+                                repcount.setText(cell5.toString());
+                                 seekBar.setVisibility(View.INVISIBLE);
+
+
+                            }
+                                TextView workoutName = (TextView) findViewById(R.id.workoutName);
+                                workoutName.setText(cell2.toString());
+
+                                TextView workoutInfo = (TextView) findViewById(R.id.workoutinfo);
+                                workoutInfo.setText(cell3.toString());
+
+                                VideoView videoView = (VideoView) findViewById(R.id.videoView);
+                                videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4");//+cell6.toString()
+
+                                videoView.start();
+                                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                    @Override
+                                    public void onPrepared(MediaPlayer mp) {
+                                        mp.setLooping(true);
+                                    }
+                                });
+
+                            }
                         }
                     }
             });

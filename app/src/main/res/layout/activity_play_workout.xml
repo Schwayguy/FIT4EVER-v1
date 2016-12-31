@@ -49,6 +49,13 @@
             android:id="@+id/repcount"
             android:layout_marginTop="20dp" />
 
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekBar2"
+            android:clickable="false"
+            android:contextClickable="false" />
+
         <Button
             android:text="Next Exercise"
             android:layout_width="match_parent"

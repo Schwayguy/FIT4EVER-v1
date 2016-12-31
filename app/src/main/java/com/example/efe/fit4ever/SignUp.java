@@ -243,6 +243,10 @@ public class SignUp extends AppCompatActivity {
                     c.setCellStyle(cs);
 
                     c = headerRow.createCell(3);
+                    c.setCellValue("ProgramName");
+                    c.setCellStyle(cs);
+
+                    c = headerRow.createCell(4);
                     c.setCellValue("IsSent");
                     c.setCellStyle(cs);
 
@@ -251,6 +255,7 @@ public class SignUp extends AppCompatActivity {
                     sheet1.setColumnWidth(1, (15 * 500));
                     sheet1.setColumnWidth(2, (15 * 500));
                     sheet1.setColumnWidth(3, (15 * 500));
+                    sheet1.setColumnWidth(4, (15 * 500));
 
                     FileOutputStream os = null;
                     os = new FileOutputStream(weightFile);
