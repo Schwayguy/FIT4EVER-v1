@@ -56,6 +56,11 @@
             android:clickable="false"
             android:contextClickable="false" />
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></LinearLayout>
+
         <Button
             android:text="Next Exercise"
             android:layout_width="match_parent"

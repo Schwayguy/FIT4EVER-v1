@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();            }
 
             try {
-                result = statement.executeQuery("select * from Programs where IsActive=1 ");
+                result = statement.executeQuery(" select * from Programs where IsActive=1 ");
             } catch (SQLException e) {
                 Log.e("ERROR", e.getMessage());
             }
@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout layout = (LinearLayout) findViewById(R.id.workouts);
         if(inet!=null)
         try {
+            assert result != null;
             result.beforeFirst();
             while (result.next()) {
                 Button btnTag = new Button(this);
@@ -222,7 +223,6 @@ public class MainActivity extends AppCompatActivity {
         if(inet!= null) {
 
             FileInputStream myInput = null;
-            sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
             File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
             if (weightFile.exists()) {
                 try {
@@ -516,6 +516,9 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
+           /* ConnURL = "jdbc:jtds:sqlserver://fit4ever1.database.windows.net:1433/Workout;user=fit4ever1;password=Bvmguxg2" +
+                    ";encrypt=true;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+            conn = DriverManager.getConnection(ConnURL, "fit4ever1", "Bvmguxg2");*/
             ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Workout";
             conn = DriverManager.getConnection(ConnURL, "efe", "e1234567");
             System.out.println("connected");

@@ -331,8 +331,12 @@ public class WorkoutIntro extends AppCompatActivity {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            /*ConnURL = "jdbc:jtds:sqlserver://fit4ever1.database.windows.net:1433/Workout;user=fit4ever1;password=Bvmguxg2" +
+                    ";encrypt=true;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+            conn = DriverManager.getConnection(ConnURL, "fit4ever1", "Bvmguxg2");*/
             ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Workout";
             conn = DriverManager.getConnection(ConnURL, "efe", "e1234567");
+
             System.out.println("connected");
         } catch (SQLException se) {
             Log.e("ERRO1", se.getMessage());

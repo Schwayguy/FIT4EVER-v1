@@ -1,7 +1,9 @@
 package com.example.efe.fit4ever;
 
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.CountDownTimer;
@@ -44,15 +46,19 @@ public class PlayWorkout extends AppCompatActivity {
     Cell cell4;
     CountDownTimer yourCountDownTimer;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_workout);
         final Button btnPlay = (Button) findViewById(R.id.buttonNext);
+        final SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPref.edit();
         File logFile = new File(getExternalFilesDir(null), getIntent().getStringExtra("PROGID") + ".xls");
         FileInputStream myInput = null;
-        final Button start= (Button) findViewById(R.id.buttonstop);
-        final Button stop= (Button) findViewById(R.id.buttonstart);
+        ;
+       // final Button start= (Button) findViewById(R.id.buttonstop);
+       // final Button stop= (Button) findViewById(R.id.buttonstart);
 
 
         try {
@@ -119,7 +125,7 @@ public class PlayWorkout extends AppCompatActivity {
             }else {
 
                 TextView repcount = (TextView) findViewById(R.id.repcount);
-                repcount.setText(cell5.toString());
+                repcount.setText("Repeat "+String.valueOf((int)Float.parseFloat(cell5.toString()))+" times");
                 seekBar.setVisibility(View.INVISIBLE);
 
             }
@@ -171,18 +177,13 @@ public class PlayWorkout extends AppCompatActivity {
                             Cell cell6 = row.getCell(videoRef.getCol());
 
                          if(cell2.toString().equals("Rest")){
-                             yourCountDownTimer =  new CountDownTimer((long) (1000*Float.parseFloat(cell5.toString())), 1000) {
-                                    public void onTick(long millisUntilFinished) {
-                                        Toast.makeText(getApplicationContext(),"Rest for: " + millisUntilFinished / 1000 +" seconds",Toast.LENGTH_SHORT).show();
-                                        btnPlay.setClickable(false);
-                                    }
-                                    public void onFinish() {
-                                        Toast.makeText(getApplicationContext(), "Continue workout", Toast.LENGTH_SHORT).show();
-                                        btnPlay.setClickable(true);
-                                        i++;
-                                    }
-                                }.start();
+                             Intent intent = new Intent(getBaseContext(), Rest.class);
+                             intent.putExtra("RESTTIME", cell5.toString());
+                             startActivity(intent);
+                             i++;
+                             j--;
                             }else{
+
                              int minute =0;
                              int seconds=0;
                             if(Float.parseFloat(cell5.toString()) > 30) {
@@ -261,7 +262,7 @@ public class PlayWorkout extends AppCompatActivity {
                              }else {
 
                                 TextView repcount = (TextView) findViewById(R.id.repcount);
-                                repcount.setText(cell5.toString());
+                                repcount.setText("Repeat "+String.valueOf((int)Float.parseFloat(cell5.toString()))+" times");
                                  seekBar.setVisibility(View.INVISIBLE);
 
 
@@ -334,4 +335,6 @@ public class PlayWorkout extends AppCompatActivity {
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
+
+
 }

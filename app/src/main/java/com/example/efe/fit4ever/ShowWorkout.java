@@ -70,7 +70,7 @@ public class ShowWorkout extends AppCompatActivity {
             }else {
 
             TextView repcount = (TextView) findViewById(R.id.repcount2);
-            repcount.setText(cell5.toString());
+            repcount.setText("Repeat "+String.valueOf((int)Float.parseFloat(cell5.toString()))+" times");
 
         }
 

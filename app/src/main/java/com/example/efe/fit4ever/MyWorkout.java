@@ -252,10 +252,10 @@ public class MyWorkout extends AppCompatActivity {
                     paint.setShadowLayer(1f, 0f, 1f, Color.BLACK);
 
                     if (cell2.toString().equals("Rest")) {
-                        canvas2.drawText(cell2.toString() + " for " + cell4.toString() + " seconds", (float) (newx * 0.4), (float) (((newx * 0.8) + (newx * 0.685) * (i - 3))), paint);
+                        canvas2.drawText(cell2.toString() + " for " + String.valueOf((int)Float.parseFloat(cell4.toString())) + " seconds", (float) (newx * 0.4), (float) (((newx * 0.8) + (newx * 0.685) * (i - 3))), paint);
                     } else {
                         if (Float.parseFloat(cell4.toString()) < 30) {
-                            canvas2.drawText(cell2.toString() + " x " + cell4.toString(), (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                            canvas2.drawText(cell2.toString() + " x " + String.valueOf((int)Float.parseFloat(cell4.toString())), (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
                         } else {
                             if (Float.parseFloat(cell4.toString()) >= 60) {
                                 int minute = (int) (Float.parseFloat(cell4.toString()) / 60);
@@ -263,18 +263,18 @@ public class MyWorkout extends AppCompatActivity {
 
                                 canvas2.drawText(cell2.toString() + " for " +minute + ":" + seconds , (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
                             } else {
-                                canvas2.drawText(cell2.toString() + " for " +"00:" + cell4.toString()  , (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                canvas2.drawText(cell2.toString() + " for " +"00:" + String.valueOf((int)Float.parseFloat(cell4.toString()))  , (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
                             }
                         }
                             if (Float.parseFloat(cell3.toString()) < 30) {
-                                canvas2.drawText(cell3.toString() + " x ", 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                canvas2.drawText(String.valueOf((int)Float.parseFloat(cell3.toString())) + " x ", 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
                             } else {
                                 if (Float.parseFloat(cell3.toString()) >= 60) {
                                     int minute = (int) (Float.parseFloat(cell3.toString()) / 60);
                                     int seconds = (int) (Float.parseFloat(cell3.toString()) % 60);
                                     canvas2.drawText(minute + ":" + seconds , 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
                                 } else {
-                                    canvas2.drawText("00:" + cell3.toString() , 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                    canvas2.drawText("00:" + String.valueOf((int)Float.parseFloat(cell3.toString())) , 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
                                 }
                             }
 
@@ -364,6 +364,9 @@ public class MyWorkout extends AppCompatActivity {
 
         try {
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
+          /*  ConnURL = "jdbc:jtds:sqlserver://fit4ever1.database.windows.net:1433/Workout;user=fit4ever1;password=Bvmguxg2" +
+                    ";encrypt=true;hostNameInCertificate=*.database.windows.net;loginTimeout=30;";
+            conn = DriverManager.getConnection(ConnURL, "fit4ever1", "Bvmguxg2");*/
             ConnURL = "jdbc:jtds:sqlserver://192.168.1.23:1433/Workout";
             conn = DriverManager.getConnection(ConnURL, "efe", "e1234567");
             System.out.println("connected");
@@ -485,40 +488,8 @@ public class MyWorkout extends AppCompatActivity {
                     File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/","1.mp4");
                     File to = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
                     if(from.exists())
-                        from.renameTo(to);/*
+                        from.renameTo(to);
 
-
-                //Open a connection to that URL.
-                    HttpURLConnection con =  (HttpURLConnection) new URL(url).openConnection();
-
-                    if(con.getResponseCode() == HttpURLConnection.HTTP_OK){
-
-                        Log.d("","File exist!");
-
-                    }else{
-
-                        Log.d("","File does not exist!");
-
-                    }
-
-                File file = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
-                InputStream is = con.getInputStream();
-                BufferedInputStream inStream = new BufferedInputStream(is, 1024 * 5);
-                FileOutputStream outStream = new FileOutputStream(file);
-                byte[] buff = new byte[5 * 1024];
-
-                //Read bytes (and store them) until there is nothing more to read(-1)
-                int len;
-                while ((len = inStream.read(buff)) != -1)
-                {
-                    outStream.write(buff,0,len);
-                }
-
-                //clean up
-                outStream.flush();
-                outStream.close();
-                inStream.close();
-*/
                     row++;
                 }
                 os = new FileOutputStream(logFile);
