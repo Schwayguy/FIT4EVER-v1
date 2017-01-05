@@ -482,7 +482,7 @@ public class WorkoutIntro extends AppCompatActivity {
                     c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Queue")));
 
 
-                    String url = "http://fit4ever.cloudapp.net/Assets/Videos/0ee7c111-5e94-4c51-8933-0e3f8fcd1a5d.mp4";
+                    String url = "http://fit4ever1.azurewebsites.net/Assets/Videos/17e2e578-4c00-4188-b4ad-c597448a082d.mp4";
                     new WorkoutIntro.DownloadFileFromURL().execute(url);
                     File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/","1.mp4");
                     File to = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));

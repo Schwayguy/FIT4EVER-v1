@@ -68,6 +68,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.Connection;
@@ -212,7 +213,7 @@ public class MyWorkout extends AppCompatActivity {
         // JUST CHANGE TO DIFFERENT Bitmaps and coordinates .
         canvas.drawBitmap(combinedBitmap, 300, 0, null);
 
-        Bitmap resized = Bitmap.createScaledBitmap(reDo, (int) (reDo.getWidth() * 0.2), (int) (reDo.getHeight() * 0.2), true);
+        Bitmap resized = Bitmap.createScaledBitmap(reDo, (int) (reDo.getWidth() *0.2), (int) (reDo.getHeight() *0.2), true);
         //Bitmap resized = Bitmap.createBitmap(combinedBitmap,0,0,(int)(combinedBitmap.getWidth()*0.5), (int)(combinedBitmap.getHeight()*0.5));
 
         FrameLayout layout = (FrameLayout) findViewById(R.id.flowFrame);
@@ -483,12 +484,13 @@ public class MyWorkout extends AppCompatActivity {
 
                     Log.d("video", workoutDownloadInfo.getString("Video"));
 
-                String url = "http://fit4ever.cloudapp.net/Assets/Videos/0ee7c111-5e94-4c51-8933-0e3f8fcd1a5d.mp4";
+                String url = "http://fit4ever.file.core.windows.net/videos/67.mp4";
                     new DownloadFileFromURL().execute(url);
-                    File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/","1.mp4");
+/*
+                    File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/1.mp4");
                     File to = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
                     if(from.exists())
-                        from.renameTo(to);
+                        from.renameTo(to);*/
 
                     row++;
                 }
@@ -588,9 +590,11 @@ public class MyWorkout extends AppCompatActivity {
         @Override
         protected String doInBackground(String... f_url) {
             int count;
+
+            URL url = null;
             try {
-                URL url = new URL(f_url[0]);
-                URLConnection conection = url.openConnection();
+                url = new URL(f_url[0]);
+            URLConnection conection = url.openConnection();
                 conection.connect();
                 // this will be useful so that you can show a tipical 0-100% progress bar
                 int lenghtOfFile = conection.getContentLength();
@@ -622,8 +626,12 @@ public class MyWorkout extends AppCompatActivity {
                 output.close();
                 input.close();
 
-            } catch (Exception e) {
-                Log.e("hatalı", e.getMessage());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             return null;
@@ -644,7 +652,7 @@ public class MyWorkout extends AppCompatActivity {
         @Override
         protected void onPostExecute(String file_url) {
             // dismiss the dialog after the file was downloaded
-            dismissDialog(progress_bar_type);
+           // dismissDialog(progress_bar_type);
         }
 
     }

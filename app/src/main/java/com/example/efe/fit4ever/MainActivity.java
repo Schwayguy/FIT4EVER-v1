@@ -12,9 +12,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPref;
     Connection conn;
     Calendar calendar = Calendar.getInstance();
+    Statement statement = null;
     int i;
     int j;
     /**
@@ -76,9 +79,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo inet = conMgr.getActiveNetworkInfo();
+        final NetworkInfo inet = conMgr.getActiveNetworkInfo();
         ResultSet result = null;
-        Statement statement = null;
+
         if (inet != null) {
             CONN();
             try {
@@ -87,11 +90,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (SQLException e) {
                 e.printStackTrace();            }
 
-            try {
-                result = statement.executeQuery(" select * from Programs where IsActive=1 ");
-            } catch (SQLException e) {
-                Log.e("ERROR", e.getMessage());
-            }
 
         }else{
             Toast.makeText(this,"Starting in offline mode.",Toast.LENGTH_SHORT).show();
@@ -134,6 +132,30 @@ public class MainActivity extends AppCompatActivity {
         String name = sharedPref.getString("email", "");
         String pass = sharedPref.getString("password", "");
 
+        final Spinner classspinner;
+        final Spinner levelspinner;
+        final Spinner ratespinner;
+        final Spinner searchspinner;
+        ArrayAdapter<CharSequence> adapter;
+        classspinner = (Spinner) findViewById(R.id.classspinner);
+        adapter = ArrayAdapter.createFromResource(this, R.array.classspinner, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        classspinner.setAdapter(adapter);
+        levelspinner = (Spinner) findViewById(R.id.levelspinner);
+        adapter = ArrayAdapter.createFromResource(this, R.array.levelspinner, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        levelspinner.setAdapter(adapter);
+
+        ratespinner = (Spinner) findViewById(R.id.ratespinner);
+        adapter = ArrayAdapter.createFromResource(this, R.array.ratespinner, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        ratespinner.setAdapter(adapter);
+
+        searchspinner = (Spinner) findViewById(R.id.searchspinner);
+        adapter = ArrayAdapter.createFromResource(this, R.array.searchspinner, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        searchspinner.setAdapter(adapter);
+
 
         if ((name == "") && (pass == "")) {
             pencere.clearAllTabs();
@@ -148,39 +170,65 @@ public class MainActivity extends AppCompatActivity {
         }
 
         pencere.setCurrentTab(0);
+        Button searchBtn = (Button)findViewById(R.id.search);
+        final EditText searchText=(EditText)findViewById(R.id.searchText);
 
-        LinearLayout layout = (LinearLayout) findViewById(R.id.workouts);
-        if(inet!=null)
-        try {
-            assert result != null;
-            result.beforeFirst();
-            while (result.next()) {
-                Button btnTag = new Button(this);
-                btnTag.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-                btnTag.setText(result.getString("Title") );
-                btnTag.setPadding(0,10,0,0);
-                layout.addView(btnTag);
-                final String progId = result.getString("ID");
-                btnTag.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
+       // final LinearLayout finalLayout = layout;
+        searchBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String levelString =levelspinner.getSelectedItem().toString();
+                String classString = classspinner.getSelectedItem().toString();
+                String rateString = ratespinner.getSelectedItem().toString();
+                String searchSpinString = searchspinner.getSelectedItem().toString();
+                String searchString=searchText.getText().toString();
+                LinearLayout layout = (LinearLayout) findViewById(R.id.work1);
+                layout.removeAllViews();
+                if(inet!=null)
+                    try {
+                        ResultSet result;
+                        if(searchSpinString.equals("Program")) {
+                            result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where IsActive=1 AND Levels LIKE '%" + levelString + "%'" +
+                                    " AND Class LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%'");
+                        }else{
+                            result = statement.executeQuery("select Programs.ID, Programs.Title from Programs INNER JOIN Users on Programs.IsActive=1 AND Levels LIKE '%" + levelString + "%'" +
+                                    " AND Class LIKE '%" + classString + "%' AND Users.Username LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Users].[ID]=[dbo].[Programs].[Creator]");
+                        }
+                        Toast.makeText(getApplicationContext(),searchSpinString,Toast.LENGTH_SHORT).show();
+                        assert result != null;
+                        result.beforeFirst();
+                        while (result.next()) {
+                            Button btnTag = new Button(getApplicationContext());
+                            btnTag.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
+                            btnTag.setText(result.getString("Title") );
+                            btnTag.setPadding(0,10,0,0);
 
-                        Intent intent = new Intent(getBaseContext(), WorkoutIntro.class);
-                        intent.putExtra("PROGID", progId);
-                        startActivity(intent);
+                            layout.addView(btnTag);
+                            final String progId = result.getString("ID");
+                            btnTag.setOnClickListener(new View.OnClickListener() {
+                                public void onClick(View v) {
 
+                                    Intent intent = new Intent(getBaseContext(), WorkoutIntro.class);
+                                    intent.putExtra("PROGID", progId);
+                                    startActivity(intent);
+
+                                }
+                            });
+
+                        }
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
                     }
-                });
 
             }
-            statement.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        });
+
+
+
         String userId = sharedPref.getString("userId", "");
 
-
         pencere.setCurrentTab(1);
-        layout = (LinearLayout) findViewById(R.id.myWorkout);
+        LinearLayout layout = (LinearLayout) findViewById(R.id.myWorkout);
 
         if ((!userId.isEmpty())&&(inet!=null)) {
             Log.d("efe", userId);
