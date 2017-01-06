@@ -193,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
                             result = statement.executeQuery("select Programs.ID, Programs.Title from Programs INNER JOIN Users on Programs.IsActive=1 AND Levels LIKE '%" + levelString + "%'" +
                                     " AND Class LIKE '%" + classString + "%' AND Users.Username LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Users].[ID]=[dbo].[Programs].[Creator]");
                         }
-                        Toast.makeText(getApplicationContext(),searchSpinString,Toast.LENGTH_SHORT).show();
                         assert result != null;
                         result.beforeFirst();
                         while (result.next()) {
@@ -324,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public void logIn(View view) throws NoSuchAlgorithmException {
+    public void logIn(View view) throws NoSuchAlgorithmException, IOException {
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         EditText usernameField = (EditText) findViewById(R.id.usernameField);
@@ -362,10 +361,12 @@ public class MainActivity extends AppCompatActivity {
                   editor.putString("password", passwordField.getText().toString());
                   editor.putString("weight", loginRes.getString("Weight"));
                   editor.putString("height", loginRes.getString("Height"));
+                  editor.putString("role", loginRes.getString("Role"));
                   editor.apply();
 
 
                  File weightFile = new File(getExternalFilesDir(null).getAbsolutePath(),loginRes.getString("ID") + ".xls");
+                 File usersFile = new File(getExternalFilesDir(null).getAbsolutePath(),"users.xls");
                  if(!weightFile.exists()) {
                      Workbook wb = new HSSFWorkbook();
                      Cell c = null;
@@ -427,25 +428,183 @@ public class MainActivity extends AppCompatActivity {
                      os = new FileOutputStream(weightFile);
                      wb.write(os);
 
-                 }else{
-                     // Toast.makeText(this,getExternalFilesDir(null).getAbsolutePath(),Toast.LENGTH_SHORT).show();
                  }
+                 if(!usersFile.exists()){
+                     Workbook wb = new HSSFWorkbook();
+                     Cell c = null;
+                     CellStyle cs = wb.createCellStyle();
+                     cs.setFillForegroundColor(HSSFColor.LIME.index);
+                     cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
 
+                     Sheet sheet1 = null;
+                     sheet1 = wb.createSheet("Users Infos");
 
+                     Row headerRow = sheet1.createRow(0);
 
-                 finish();
+                     c = headerRow.createCell(0);
+                     c.setCellValue("Email");
+                     c.setCellStyle(cs);
+                     c = headerRow.createCell(1);
+                     c.setCellValue("Password");
+                     c.setCellStyle(cs);
+                     c = headerRow.createCell(2);
+                     c.setCellValue("ID");
+                     c.setCellStyle(cs);
+                     c = headerRow.createCell(3);
+                     c.setCellValue("Username");
+                     c.setCellStyle(cs);
+                     c = headerRow.createCell(4);
+                     c.setCellValue("Weight");
+                     c.setCellStyle(cs);
+                     c = headerRow.createCell(5);
+                     c.setCellValue("Height");
+                     c.setCellStyle(cs);
+                     c = headerRow.createCell(6);
+                     c.setCellValue("Role");
+                     c.setCellStyle(cs);
+                     sheet1.setColumnWidth(0, (15 * 500));
+                     sheet1.setColumnWidth(1, (15 * 500));
+                     sheet1.setColumnWidth(2, (15 * 500));
+                     sheet1.setColumnWidth(3, (15 * 500));
+                     sheet1.setColumnWidth(4, (15 * 500));
+                     sheet1.setColumnWidth(5, (15 * 500));
+                     sheet1.setColumnWidth(6, (15 * 500));
+                     int row = 1;
+                     Row dataRow = sheet1.createRow(row);
+
+                     c = dataRow.createCell(0);
+                     c.setCellValue(usernameField.getText().toString());
+                     c = dataRow.createCell(1);
+                     c.setCellValue(passbuffer.toString());
+                     c = dataRow.createCell(2);
+                     c.setCellValue(loginRes.getString("ID"));
+                     c = dataRow.createCell(3);
+                     c.setCellValue(loginRes.getString("Username"));
+                     c = dataRow.createCell(4);
+                     c.setCellValue(loginRes.getString("Weight"));
+                     c = dataRow.createCell(5);
+                     c.setCellValue(loginRes.getString("Height"));
+                     c = dataRow.createCell(6);
+                     c.setCellValue(loginRes.getString("Role"));
+                     FileOutputStream os = null;
+                     os = new FileOutputStream(usersFile);
+                     wb.write(os);
+                 }else{
+                     FileInputStream myInput = null;
+                     myInput = new FileInputStream(usersFile);
+                     POIFSFileSystem myFileSystem = null;
+                     myFileSystem = new POIFSFileSystem(myInput);
+                     HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                     final HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                     final int rowNumber = mySheet.getPhysicalNumberOfRows();
+                     int i=2;
+                     CellReference idRef = new CellReference("C" + i);
+                     Row row = mySheet.getRow(idRef.getRow());
+                     Cell cell1 = row.getCell(idRef.getCol());
+                     while((!cell1.toString().equals(loginRes.getString("ID")))&&(i<rowNumber)){
+                         i++;
+                         idRef = new CellReference("C" + i);
+                         row = mySheet.getRow(idRef.getRow());
+                         cell1 = row.getCell(idRef.getCol());
+                     }
+                     if (cell1.toString().equals(loginRes.getString("ID")))    {
+                         CellReference weightRef = new CellReference("E" + i);
+                         Cell cell2 = row.getCell(weightRef.getCol());
+                         cell2.setCellValue(loginRes.getString("Weight"));
+                         FileOutputStream os = null;
+                         os = new FileOutputStream(usersFile);
+                         myWorkBook.write(os);
+                     }else{
+
+                     FileOutputStream os = null;
+                     Cell c = null;
+                     Row dataRow = mySheet.createRow(rowNumber);
+                     c = dataRow.createCell(0);
+                     c.setCellValue(usernameField.getText().toString());
+                     c = dataRow.createCell(1);
+                     c.setCellValue(passbuffer.toString());
+                     c = dataRow.createCell(2);
+                     c.setCellValue(loginRes.getString("ID"));
+                     c = dataRow.createCell(3);
+                     c.setCellValue(loginRes.getString("Username"));
+                     c = dataRow.createCell(4);
+                     c.setCellValue(loginRes.getString("Weight"));
+                     c = dataRow.createCell(5);
+                     c.setCellValue(loginRes.getString("Height"));
+                     c = dataRow.createCell(6);
+                     c.setCellValue(loginRes.getString("Role"));
+                     os = new FileOutputStream(usersFile);
+                     myWorkBook.write(os);
+                     os.close();
+                 }
+                 }
+                  finish();
                   startActivity(getIntent());
                //   displayData(view);
              }
+
          } catch (SQLException e) {
              Log.e("ERROR", e.getMessage());
-             Toast.makeText(this,"You need internet connection to login.",Toast.LENGTH_SHORT).show();
+             Toast.makeText(this,"Can't access the server.",Toast.LENGTH_SHORT).show();
          } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }else{
+            File usersFile = new File(getExternalFilesDir(null).getAbsolutePath(),"users.xls");
+            if(usersFile.exists()){
+                FileInputStream myInput = null;
+                myInput = new FileInputStream(usersFile);
+                POIFSFileSystem myFileSystem = null;
+                myFileSystem = new POIFSFileSystem(myInput);
+                HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                final HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                final int rowNumber = mySheet.getPhysicalNumberOfRows();
+                FileOutputStream os = null;
+                int i=2;
+                boolean found = false;
+                while ((i <= rowNumber)&&(found==false)) {
+                    CellReference emailRef = new CellReference("A" + i);
+                    CellReference passRef = new CellReference("B" + i);
+                    CellReference idRef = new CellReference("C" + i);
+                    CellReference nameRef = new CellReference("D" + i);
+                    CellReference weightRef = new CellReference("E" + i);
+                    CellReference heightRef = new CellReference("F" + i);
+                    CellReference roleRef = new CellReference("G" + i);
+                    Row row = mySheet.getRow(emailRef.getRow());
+                    Cell cell1 = row.getCell(emailRef.getCol());
+                    Cell cell2 = row.getCell(passRef.getCol());
+                    Cell cell3 = row.getCell(idRef.getCol());
+                    Cell cell4 = row.getCell(nameRef.getCol());
+                    Cell cell5 = row.getCell(weightRef.getCol());
+                    Cell cell6 = row.getCell(heightRef.getCol());
+                    Cell cell7 = row.getCell(roleRef.getCol());
+                    if ((cell1.toString().equals(usernameField.getText().toString())&&(cell2.toString().equals(passbuffer.toString())))) {
+                        Log.d("login","username kabul");
+                        editor.putString("lastLoginDate", calendar.get(Calendar.YEAR) + "-" +  String.valueOf(calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH));
+                        editor.putString("userId", cell3.toString());
+                        editor.putString("username", cell4.toString());
+                        editor.putString("email", cell1.toString());
+                        editor.putString("password", cell2.toString());
+                        editor.putString("height", cell6.toString());
+                        editor.putString("weight", cell5.toString());
+                        editor.putString("role", cell7.toString());
+                        editor.apply();
+                        found=true;
+                        finish();
+                        startActivity(getIntent());
+                    }else{
+                        i++;
+                    }
+
+                }
+                if(i>rowNumber){
+                    Toast.makeText(this,"Wrong email or password",Toast.LENGTH_SHORT).show();
+                }
+            }else{
+                Toast.makeText(this,"You need to login online once",Toast.LENGTH_SHORT).show();
+            }
 
         }
 
@@ -472,6 +631,8 @@ public class MainActivity extends AppCompatActivity {
         editor.remove("progId");
         editor.remove("progname");
         editor.remove("height");
+        editor.remove("role");
+        editor.remove("lastLoginDate");
         editor.apply();
         finish();
         startActivity(getIntent());
@@ -486,16 +647,20 @@ public class MainActivity extends AppCompatActivity {
         weightText = (EditText) findViewById(R.id.weightText);
         String wT = weightText.getText().toString();
         Statement statement = null;
-        try {
-            statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
-                    ResultSet.CONCUR_UPDATABLE);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
         if (!wT.isEmpty()) {
             try {
-                statement.executeUpdate("update Users set Weight="+wT+" where ID ='"+sharedPref.getString("userId", "")+"'");
-
+                ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo inet = conMgr.getActiveNetworkInfo();
+                if (inet != null) {
+                    try {
+                        statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                                ResultSet.CONCUR_UPDATABLE);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    statement.executeUpdate("update Users set Weight=" + wT + " where ID ='" + sharedPref.getString("userId", "") + "'");
+                }
                 File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "")+ ".xls");
                 if(weightFile.exists()) {
                     FileInputStream myInput = null;
@@ -523,6 +688,35 @@ public class MainActivity extends AppCompatActivity {
                     myWorkBook.write(os);
                     os.close();
                 }
+                File usersFile = new File(getExternalFilesDir(null), "users.xls");
+                if(weightFile.exists()) {
+                    FileInputStream myInput = null;
+                    myInput = new FileInputStream(usersFile);
+                    POIFSFileSystem myFileSystem = null;
+                    myFileSystem = new POIFSFileSystem(myInput);
+                    HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                    final HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                    final int rowNumber = mySheet.getPhysicalNumberOfRows();
+                    FileOutputStream os = null;
+                    int i=2;
+                    CellReference idRef = new CellReference("C" + i);
+                    Row row = mySheet.getRow(idRef.getRow());
+                    Cell cell1 = row.getCell(idRef.getCol());
+                    while(!cell1.toString().equals(sharedPref.getString("userId", ""))){
+                        i++;
+                        idRef = new CellReference("C" + i);
+                        row = mySheet.getRow(idRef.getRow());
+                        cell1 = row.getCell(idRef.getCol());
+                    }
+
+                    CellReference weightRef = new CellReference("E" + i);
+                    Cell cell2 = row.getCell(weightRef.getCol());
+                    cell2.setCellValue(wT);
+                    os = new FileOutputStream(usersFile);
+                    myWorkBook.write(os);
+                    os.close();
+                }
+
             }
             catch (SQLException e) {
                 Log.e("ERROR", e.getMessage());
