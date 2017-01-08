@@ -200,9 +200,7 @@ public class MyWorkout extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (inet != null) {
-            Download();
-        } else {
+        }  else {
             Toast.makeText(this, "You need internet connection to redownload your program.", Toast.LENGTH_SHORT).show();
         }
         combinedBitmap = drawTwo(combinedBitmap.getHeight(), circleHeight, combinedBitmap, circle);
@@ -381,136 +379,10 @@ public class MyWorkout extends AppCompatActivity {
         return conn;
     }
 
-    public void Download() {
-        SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        String userId = sharedPref.getString("userId", "");
-        File logFile = new File(getExternalFilesDir(null),getIntent().getStringExtra("PROGID") + ".xls");
-
-        // şuan her zaman yeni dosya indiriyo sonra düzelt
-        if(logFile.exists()){
-            Toast.makeText(this,"It already exists.",Toast.LENGTH_SHORT).show();
-        }else {
-            try {
-                ResultSet workoutDownloadInfo = statement.executeQuery("USE [Workout] SELECT  WorkoutID ,Name, Video, Information ,Rate, Title ,Subtitle , Period ,Repeat, Queue" +
-                        " FROM [dbo].[Workouts] INNER JOIN [dbo].[PWRelation] on [dbo].[Workouts].[ID]=[dbo].[PWRelation].[WorkoutID] AND" +
-                        " [dbo].[PWRelation].[IsActive]=1 AND [ProgramID]='" + getIntent().getStringExtra("PROGID") + "' order by Queue");
-
-                Workbook wb = new HSSFWorkbook();
-                Cell c = null;
-                CellStyle cs = wb.createCellStyle();
-                cs.setFillForegroundColor(HSSFColor.LIME.index);
-                cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-
-                Sheet sheet1 = null;
-                sheet1 = wb.createSheet("Workout Sheet");
-
-                Row headerRow = sheet1.createRow(0);
-
-                c = headerRow.createCell(0);
-                c.setCellValue("WorkoutID");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(1);
-                c.setCellValue("Name");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(2);
-                c.setCellValue("Video");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(3);
-                c.setCellValue("Information");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(4);
-                c.setCellValue("Rate");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(5);
-                c.setCellValue("Title");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(6);
-                c.setCellValue("Subtitle");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(7);
-                c.setCellValue("Period");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(8);
-                c.setCellValue("Repeat");
-                c.setCellStyle(cs);
-
-                c = headerRow.createCell(9);
-                c.setCellValue("Queue");
-                c.setCellStyle(cs);
-
-                sheet1.setColumnWidth(0, (15 * 700));
-                sheet1.setColumnWidth(1, (15 * 500));
-                sheet1.setColumnWidth(2, (15 * 500));
-                sheet1.setColumnWidth(3, (15 * 500));
-                sheet1.setColumnWidth(4, (15 * 500));
-                sheet1.setColumnWidth(5, (15 * 500));
-                sheet1.setColumnWidth(6, (15 * 200));
-                sheet1.setColumnWidth(7, (15 * 200));
-                sheet1.setColumnWidth(8, (15 * 200));
-                sheet1.setColumnWidth(9, (15 * 200));
-
-                FileOutputStream os = null;
-                int row = 1;
-                while (workoutDownloadInfo.next()) {
-                    Row dataRow = sheet1.createRow(row);
-                    c = dataRow.createCell(0);
-                    c.setCellValue(workoutDownloadInfo.getString("WorkoutID"));
-                    c = dataRow.createCell(1);
-                    c.setCellValue(workoutDownloadInfo.getString("Name"));
-                    c = dataRow.createCell(2);
-                    c.setCellValue(workoutDownloadInfo.getString("Video"));
-                    c = dataRow.createCell(3);
-                    c.setCellValue(workoutDownloadInfo.getString("Information"));
-                    c = dataRow.createCell(4);
-                    c.setCellValue(Float.toString(workoutDownloadInfo.getFloat("Rate")));
-                    c = dataRow.createCell(5);
-                    c.setCellValue(workoutDownloadInfo.getString("Title"));
-                    c = dataRow.createCell(6);
-                    c.setCellValue(workoutDownloadInfo.getString("Subtitle"));
-                    c = dataRow.createCell(7);
-                    c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Period")));
-                    c = dataRow.createCell(8);
-                    c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Repeat")));
-                    c = dataRow.createCell(9);
-                    c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Queue")));
-
-                    Log.d("video", workoutDownloadInfo.getString("Video"));
-
-                String url = "http://fit4ever.file.core.windows.net/videos/67.mp4";
-                    new DownloadFileFromURL().execute(url);
-/*
-                    File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/1.mp4");
-                    File to = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
-                    if(from.exists())
-                        from.renameTo(to);*/
-
-                    row++;
-                }
-                os = new FileOutputStream(logFile);
-                wb.write(os);
 
 
 
-                Toast.makeText(this, "Download successful.", Toast.LENGTH_SHORT).show();
-                os.close();
-                finish();
-                startActivity(getIntent());
-            } catch (SQLException e) {
-                Log.e("error download", e.getMessage());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-        }
-    }
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -572,88 +444,5 @@ public class MyWorkout extends AppCompatActivity {
     /**
      * Background Async Task to download file
      * */
-    class DownloadFileFromURL extends AsyncTask<String, String, String> {
 
-        /**
-         * Before starting background thread
-         * Show Progress Bar Dialog
-         * */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            showDialog(progress_bar_type);
-        }
-
-        /**
-         * Downloading file in background thread
-         * */
-        @Override
-        protected String doInBackground(String... f_url) {
-            int count;
-
-            URL url = null;
-            try {
-                url = new URL(f_url[0]);
-            URLConnection conection = url.openConnection();
-                conection.connect();
-                // this will be useful so that you can show a tipical 0-100% progress bar
-                int lenghtOfFile = conection.getContentLength();
-
-                // download the file
-                InputStream input = new BufferedInputStream(url.openStream(), 8192);
-
-                // Output stream
-                OutputStream output = new FileOutputStream("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/1.mp4");
-
-                byte data[] = new byte[1024];
-
-                long total = 0;
-
-                while ((count = input.read(data)) != -1) {
-                    total += count;
-                    // publishing the progress....
-                    // After this onProgressUpdate will be called
-                    publishProgress(""+(int)((total*100)/lenghtOfFile));
-
-                    // writing data to file
-                    output.write(data, 0, count);
-                }
-
-                // flushing output
-                output.flush();
-
-                // closing streams
-                output.close();
-                input.close();
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        /**
-         * Updating progress bar
-         * */
-        protected void onProgressUpdate(String... progress) {
-            // setting progress percentage
-            pDialog.setProgress(Integer.parseInt(progress[0]));
-        }
-
-        /**
-         * After completing background task
-         * Dismiss the progress dialog
-         * **/
-        @Override
-        protected void onPostExecute(String file_url) {
-            // dismiss the dialog after the file was downloaded
-           // dismissDialog(progress_bar_type);
-        }
-
-    }
 }

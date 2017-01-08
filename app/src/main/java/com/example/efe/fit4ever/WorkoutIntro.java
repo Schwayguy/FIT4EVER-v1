@@ -36,6 +36,7 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
@@ -54,6 +55,8 @@ import net.sourceforge.jtds.jdbc.UniqueIdentifier;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -359,15 +362,18 @@ public class WorkoutIntro extends AppCompatActivity {
                 if (!tryWorkoutPurchase.next()) {
                     statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UPRelation] ([ID] ,[ProgramID],[UserID],[RegisterDate]) VALUES" +
                             " ('" + uniqueID + "','" + getIntent().getStringExtra("PROGID") + "','" + userId + "','" + calendar.get(Calendar.YEAR) + "-" +  String.valueOf(calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "')");
+                    statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Programs] SET IsEditable=0 where ID='"+ getIntent().getStringExtra("PROGID")+"')");
                     Toast.makeText(this, "Program purchased.", Toast.LENGTH_SHORT).show();
 
-                    Download();
+
                     //MyWorkout'a gönder
 
 
                 } else {
                     Toast.makeText(this, "You already own this workout.", Toast.LENGTH_SHORT).show();
                 }
+
+                Download();
             } catch (SQLException e) {
                 Log.e("ERRORp", e.getMessage());
             }
@@ -518,6 +524,7 @@ public class WorkoutIntro extends AppCompatActivity {
 
                 Toast.makeText(this, "Download successful.", Toast.LENGTH_SHORT).show();
                 os.close();
+                AddToDevice();
 
             } catch (SQLException e) {
                 Log.e("error download", e.getMessage());
@@ -525,11 +532,122 @@ public class WorkoutIntro extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo inet = conMgr.getActiveNetworkInfo();
-        if (inet != null) {
-            // layout oluştur sqlqueryden sırasıyla comment ekle
-            //user comment en üstte olsun
+    }
+
+    public void AddToDevice(){
+        try {
+            ResultSet selectProgram = statement.executeQuery("USE [Workout] SELECT [dbo].[Programs].[ID],[dbo].[Programs].[Rate],[dbo].[Programs].[Creator]," +
+                    " [dbo].[Users].[Username],[dbo].[Programs].[IsActive],[dbo].[Programs].[Title],[dbo].[Programs].[Information],[dbo].[Programs].[IsDeleted]," +
+                    "[dbo].[Programs].[CreateDate],[dbo].[Programs].[ProgramLevel],[dbo].[Programs].[ProgramCategory]" +
+                    " FROM [dbo].[Programs] INNER JOIN [Users] on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] and " +
+                    "[dbo].[Programs].[ID]='"+getIntent().getStringExtra("PROGID")+"'");
+
+        File programsFile = new File(getExternalFilesDir(null).getAbsolutePath(),"programs.xls");
+
+        if(!programsFile.exists()) {
+            Workbook myWorkBook = new HSSFWorkbook();
+            Cell c = null;
+            CellStyle cs = myWorkBook.createCellStyle();
+            cs.setFillForegroundColor(HSSFColor.LIME.index);
+            cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+            Sheet sheet1 = null;
+            sheet1 = myWorkBook.createSheet("Programs Infos");
+            Row headerRow = sheet1.createRow(0);
+
+            c = headerRow.createCell(0);
+            c.setCellValue("ID");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(1);
+            c.setCellValue("Rate");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(2);
+            c.setCellValue("CreatorID");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(3);
+            c.setCellValue("CreatorName");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(4);
+            c.setCellValue("IsActive");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(5);
+            c.setCellValue("Title");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(6);
+            c.setCellValue("Information");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(7);
+            c.setCellValue("IsDeleted");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(8);
+            c.setCellValue("CreateDate");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(9);
+            c.setCellValue("ProgramLevel");
+            c.setCellStyle(cs);
+            c = headerRow.createCell(10);
+            c.setCellValue("ProgramCategory");
+            c.setCellStyle(cs);
+            sheet1.setColumnWidth(0, (15 * 500));
+            sheet1.setColumnWidth(1, (15 * 500));
+            sheet1.setColumnWidth(2, (15 * 500));
+            sheet1.setColumnWidth(3, (15 * 500));
+            sheet1.setColumnWidth(4, (15 * 500));
+            sheet1.setColumnWidth(5, (15 * 500));
+            sheet1.setColumnWidth(6, (15 * 500));
+            sheet1.setColumnWidth(7, (15 * 500));
+            sheet1.setColumnWidth(8, (15 * 500));
+            sheet1.setColumnWidth(9, (15 * 500));
+            sheet1.setColumnWidth(10, (15 * 500));
+
+            FileOutputStream os = null;
+            os = new FileOutputStream(programsFile);
+            myWorkBook.write(os);
+            os.close();
+        }
+            FileInputStream myInput = null;
+            myInput = new FileInputStream(programsFile);
+            POIFSFileSystem myFileSystem = null;
+            myFileSystem = new POIFSFileSystem(myInput);
+            HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+            HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+            int rowNumber = mySheet.getPhysicalNumberOfRows();
+            FileOutputStream os = null;
+            Cell c = null;
+            while(selectProgram.next()) {
+                Row dataRow = mySheet.createRow(rowNumber);
+                c = dataRow.createCell(0);
+                c.setCellValue(selectProgram.getString("ID"));
+                c = dataRow.createCell(1);
+                c.setCellValue(selectProgram.getString("Rate"));
+                c = dataRow.createCell(2);
+                c.setCellValue(selectProgram.getString("Creator"));
+                c = dataRow.createCell(3);
+                c.setCellValue(selectProgram.getString("Username"));
+                c = dataRow.createCell(4);
+                c.setCellValue(selectProgram.getString("IsActive"));
+                c = dataRow.createCell(5);
+                c.setCellValue(selectProgram.getString("Title"));
+                c = dataRow.createCell(6);
+                c.setCellValue(selectProgram.getString("Information"));
+                c = dataRow.createCell(7);
+                c.setCellValue(selectProgram.getString("IsDeleted"));
+                c = dataRow.createCell(8);
+                c.setCellValue(selectProgram.getString("CreateDate"));
+                c = dataRow.createCell(9);
+                c.setCellValue(selectProgram.getString("ProgramLevel"));
+                c = dataRow.createCell(10);
+                c.setCellValue(selectProgram.getString("ProgramCategory"));
+            }
+            os = new FileOutputStream(programsFile);
+            myWorkBook.write(os);
+            os.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

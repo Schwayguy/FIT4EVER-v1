@@ -186,12 +186,37 @@ public class MainActivity extends AppCompatActivity {
                 if(inet!=null)
                     try {
                         ResultSet result;
+                        int level=0;
+                        if(levelString.equals("Beginner")){
+                            level=0;
+                            levelString = String.valueOf(level);
+                        }else if(levelString.equals("Intermediate")){
+                            level=1;
+                            levelString = String.valueOf(level);}
+                        else if(levelString.equals("Advanced")){
+                            level=2;
+                            levelString = String.valueOf(level);}
+
+                        int category=0;
+                        if(classString.equals("Agility")){
+                            category=0;
+                            classString = String.valueOf(category);
+                        }else if(classString.equals("Strength")){
+                            category=1;
+                            classString = String.valueOf(category);}
+                        else if(classString.equals("Fitness")){
+                            category=2;
+                            classString = String.valueOf(category);}
+                        else if(classString.equals("Fat-burning")){
+                            category=3;
+                            classString = String.valueOf(category);}
+
                         if(searchSpinString.equals("Program")) {
-                            result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where IsActive=1 AND Levels LIKE '%" + levelString + "%'" +
-                                    " AND Class LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%'");
+                            result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
+                                    " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%'");
                         }else{
-                            result = statement.executeQuery("select Programs.ID, Programs.Title from Programs INNER JOIN Users on Programs.IsActive=1 AND Levels LIKE '%" + levelString + "%'" +
-                                    " AND Class LIKE '%" + classString + "%' AND Users.Username LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Users].[ID]=[dbo].[Programs].[Creator]");
+                            result = statement.executeQuery("select Programs.ID, Programs.Title from Programs INNER JOIN Users on Programs.IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
+                                    " AND ProgramCategory LIKE '%" + classString + "%' AND Users.Username LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Users].[ID]=[dbo].[Programs].[Creator]");
                         }
                         assert result != null;
                         result.beforeFirst();
