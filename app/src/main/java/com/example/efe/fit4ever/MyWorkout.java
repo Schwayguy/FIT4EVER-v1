@@ -117,26 +117,64 @@ public class MyWorkout extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
-        ResultSet result = null;
+        File programsFile = new File(getExternalFilesDir(null), "programs.xls");
+        FileInputStream myInput = null;
         try {
-            result = statement.executeQuery("select Title, Rate, Information, Name, Surname from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] AND" +
-                    "[dbo].[Programs].[ID] = '" + progId + "'");
-        } catch (SQLException e) {
-            Log.e("ERRORc", e.getMessage());
-        }
-        try {
-            assert result != null;
-            while (result.next()) {
-                progTitle.setText(result.getString("Title"));
-                progowner.setText("Author: " + result.getString("Name") + " " + result.getString("Surname"));
-                ratingtext.setText(result.getString("Rate"));
-                ratingBar.setRating(Float.parseFloat(result.getString("Rate")));
-                description.setText(result.getString("Information"));
+            myInput = new FileInputStream(programsFile);
+            POIFSFileSystem myFileSystem = null;
+            myFileSystem = new POIFSFileSystem(myInput);
+            HSSFWorkbook myWorkBook = null;
+            myWorkBook = new HSSFWorkbook(myFileSystem);
+            HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+            int rowNumber = mySheet.getPhysicalNumberOfRows();
+            int i=2;
+            for (i = 2; i <= rowNumber; i++) {
+                CellReference userRef = new CellReference("L" + i);
+                CellReference titleRef = new CellReference("F" + i);
+                CellReference idRef = new CellReference("A" + i);
+                CellReference creatornameRef = new CellReference("D" + i);
+                CellReference rateRef = new CellReference("B" + i);
+                CellReference infoRef = new CellReference("G" + i);
+                Row row = mySheet.getRow(userRef.getRow());
+                Cell cell = row.getCell(idRef.getCol());
+                Cell cell2 = row.getCell(titleRef.getCol());
+                Cell cell4 = row.getCell(creatornameRef.getCol());
+                Cell cell5 = row.getCell(rateRef.getCol());
+                Cell cell6 = row.getCell(infoRef.getCol());
+                if (cell.toString().equals(progId)) {
+                    progTitle.setText(cell2.toString());
+                    progowner.setText("Author: " +cell4.toString());
+                    ratingtext.setText(cell5.toString());
+                    ratingBar.setRating(Float.parseFloat(cell5.toString()));
+                    description.setText(cell6.toString());
+                }
             }
-        } catch (SQLException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (inet != null) {
+            ResultSet result = null;
+            try {
+                result = statement.executeQuery("select IsDeleted,IsEditable,IsActive,Rate from Programs where" +
+                        "[dbo].[Programs].[ID] = '" + progId + "'");
+            } catch (SQLException e) {
+                Log.e("ERRORc", e.getMessage());
+            }
+            try {
+                assert result != null;
+                while (result.next()) {
+                    ratingtext.setText(result.getString("Rate"));
+                    ratingBar.setRating(Float.parseFloat(result.getString("Rate")));
+                    //aktiflik uyarısını burada yap
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         Button btnPlay = (Button) findViewById(R.id.startButton);
         btnPlay.setOnClickListener(new View.OnClickListener() {
@@ -173,7 +211,7 @@ public class MyWorkout extends AppCompatActivity {
 
 
         File logFile = new File(getExternalFilesDir(null), getIntent().getStringExtra("PROGID") + ".xls");
-        FileInputStream myInput = null;
+        myInput = null;
         if (logFile.exists()) {
             try {
                 myInput = new FileInputStream(logFile);

@@ -44,6 +44,7 @@ public class PlayWorkout extends AppCompatActivity {
     int i ;
     int j ;
     Cell cell4;
+    Cell cell5;
     CountDownTimer yourCountDownTimer;
 
 
@@ -71,7 +72,7 @@ public class PlayWorkout extends AppCompatActivity {
             final SeekBar seekBar = (SeekBar) findViewById(R.id.seekBar2);
             seekBar.setVisibility(View.INVISIBLE);
             i=2;
-            j=0;
+            j=1;
             CellReference idRef = new CellReference("A" + i);
             CellReference nameRef = new CellReference("B" + i);
             CellReference videoRef = new CellReference("C" + i);
@@ -83,8 +84,12 @@ public class PlayWorkout extends AppCompatActivity {
             Cell cell2 = row.getCell(nameRef.getCol());
             Cell cell3 = row.getCell(infoRef.getCol());
             cell4 = row.getCell(periodRef.getCol());
-            final Cell cell5 = row.getCell(repeatRef.getCol());
+            cell5 = row.getCell(repeatRef.getCol());
             Cell cell6 = row.getCell(videoRef.getCol());
+            if((Integer.parseInt(cell4.toString())==0)||(Integer.parseInt(cell4.toString())==1)){
+                i++;
+                j = 0;
+            }
 
             int minute =0;
             int seconds=0;
@@ -149,39 +154,43 @@ public class PlayWorkout extends AppCompatActivity {
             });
             btnPlay.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        if (j >= Integer.parseInt(cell4.toString()) - 1) {
+                        if (i > rowNumber) {
+                            Toast.makeText(getApplicationContext(), "Great job!", Toast.LENGTH_SHORT).show();
+                            finish();
+                        } else {
+                        CellReference idRef = new CellReference("A" + i);
+                        CellReference nameRef = new CellReference("B" + i);
+                        CellReference videoRef = new CellReference("C" + i);
+                        CellReference infoRef = new CellReference("D" + i);
+                        CellReference periodRef = new CellReference("H" + i);
+                        CellReference repeatRef = new CellReference("I" + i);
+                        Row row = mySheet.getRow(idRef.getRow());
+                        Cell cell1 = row.getCell(idRef.getCol());
+                        Cell cell2 = row.getCell(nameRef.getCol());
+                        Cell cell3 = row.getCell(infoRef.getCol());
+                        cell4 = row.getCell(periodRef.getCol());
+                        cell5 = row.getCell(repeatRef.getCol());
+                        Cell cell6 = row.getCell(videoRef.getCol());
+                        if((Integer.parseInt(cell4.toString())==0)||(Integer.parseInt(cell4.toString())==1)){
+                            i++;
+                            j = 0;
+                        }
+                        else if (j+1 > Integer.parseInt(cell4.toString())) {
                             j = 0;
                             i++;
                         } else {
                             j++;
                         }
-                        Log.d("i degeri", String.valueOf(i));
-                        Log.d("j degeri", String.valueOf(j));
-                        if (i > rowNumber) {
-                            Toast.makeText(getApplicationContext(), "Great job!", Toast.LENGTH_SHORT).show();
-                            finish();
-                        } else {
+                        Log.d("aaab", String.valueOf(j)+" "+cell4.toString()+" "+cell2.toString()+" "+String.valueOf(i));
 
-                            CellReference idRef = new CellReference("A" + i);
-                            CellReference nameRef = new CellReference("B" + i);
-                            CellReference videoRef = new CellReference("C" + i);
-                            CellReference infoRef = new CellReference("D" + i);
-                            CellReference periodRef = new CellReference("H" + i);
-                            CellReference repeatRef = new CellReference("I" + i);
-                            Row row = mySheet.getRow(idRef.getRow());
-                            Cell cell1 = row.getCell(idRef.getCol());
-                            Cell cell2 = row.getCell(nameRef.getCol());
-                            Cell cell3 = row.getCell(infoRef.getCol());
-                            final Cell cell4 = row.getCell(periodRef.getCol());
-                            final Cell cell5 = row.getCell(repeatRef.getCol());
-                            Cell cell6 = row.getCell(videoRef.getCol());
+
+
 
                          if(cell2.toString().equals("Rest")){
                              Intent intent = new Intent(getBaseContext(), Rest.class);
                              intent.putExtra("RESTTIME", cell5.toString());
                              startActivity(intent);
-                             i++;
-                             j--;
+                             j=0;
                             }else{
 
                              int minute =0;

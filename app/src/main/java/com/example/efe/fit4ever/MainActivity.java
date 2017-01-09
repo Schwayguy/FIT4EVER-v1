@@ -250,39 +250,56 @@ public class MainActivity extends AppCompatActivity {
 
 
         String userId = sharedPref.getString("userId", "");
-
         pencere.setCurrentTab(1);
         LinearLayout layout = (LinearLayout) findViewById(R.id.myWorkout);
 
-        if ((!userId.isEmpty())&&(inet!=null)) {
+        if (!userId.isEmpty()) {
             Log.d("efe", userId);
-            try {
-                Statement statement2 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                final ResultSet myworkoutsRes = statement2.executeQuery("SELECT ProgramID, Title FROM [dbo].[Programs] INNER JOIN [dbo].[UPRelation] on " +
-                        "[dbo].[Programs].[ID]=[dbo].[UPRelation].[ProgramID] and [dbo].[UPRelation].[UserID] ='" + userId+"'");
-                while (myworkoutsRes.next()) {
-                    Button btnWorks = new Button(this);
-                    btnWorks.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-                        btnWorks.setText(myworkoutsRes.getString("Title"));
-                        Log.d("24", myworkoutsRes.getString("ProgramID"));
-                        btnWorks.setPadding(0,10,0,0);
-                        layout.addView(btnWorks);
-                        final String progId = myworkoutsRes.getString("ProgramID");
+                File programsFile = new File(getExternalFilesDir(null), "programs.xls");
+                FileInputStream myInput = null;
+                if (programsFile.exists()) {
+                    try {
+                        myInput = new FileInputStream(programsFile);
+                        POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
+                        HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                        HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                        int rowNumber = mySheet.getPhysicalNumberOfRows();
+                        int i;
+                        for (i = 2; i <= rowNumber; i++) {
+                            CellReference userRef = new CellReference("L" + i);
+                            CellReference titleRef = new CellReference("F" + i);
+                            CellReference idRef = new CellReference("A" + i);
+                            Row row = mySheet.getRow(userRef.getRow());
+                            Cell cell = row.getCell(userRef.getCol());
+                            Cell cell2 = row.getCell(titleRef.getCol());
+                            Cell cell3 = row.getCell(idRef.getCol());
+                            if (cell.toString().equals(userId)) {
+                                Button btnWorks = new Button(this);
+                                btnWorks.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
+                                btnWorks.setText(cell2.toString());
+                                btnWorks.setPadding(0,10,0,0);
+                                layout.addView(btnWorks);
+                                final String progId = cell3.toString();
 
-                        btnWorks.setOnClickListener(new View.OnClickListener() {
-                            public void onClick(View v) {
+                                btnWorks.setOnClickListener(new View.OnClickListener() {
+                                    public void onClick(View v) {
 
-                                Intent intent = new Intent(getBaseContext(), MyWorkout.class);
-                                intent.putExtra("PROGID", progId);
-                                startActivity(intent);
+                                        Intent intent = new Intent(getBaseContext(), MyWorkout.class);
+                                        intent.putExtra("PROGID", progId);
+                                        startActivity(intent);
 
+                                    }
+                                });
                             }
-                        });
+                        }
 
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+
         }else{
             TextView txt = new TextView(this);
             txt.setText("Login to see your workouts");

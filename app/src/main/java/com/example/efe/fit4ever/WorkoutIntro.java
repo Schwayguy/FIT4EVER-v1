@@ -124,6 +124,9 @@ public class WorkoutIntro extends AppCompatActivity {
                 four = Integer.parseInt(result.getString("Four"));
                 five = Integer.parseInt(result.getString("Five"));
                 addition = one + two + three + four + five;
+                if(addition==0){
+                    addition++;
+                }
                 progratevalue = ((one * 1) + (two * 2) + (three * 3) + (four * 4) + (five * 5)) / addition;
             }
 
@@ -383,6 +386,7 @@ public class WorkoutIntro extends AppCompatActivity {
 
         Intent intent = new Intent(getBaseContext(),MainActivity.class);
         startActivity(intent);
+        finish();
     }
 
     public void Download() {
@@ -487,34 +491,14 @@ public class WorkoutIntro extends AppCompatActivity {
                     c = dataRow.createCell(9);
                     c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Queue")));
 
-
+/*
                     String url = "http://fit4ever1.azurewebsites.net/Assets/Videos/17e2e578-4c00-4188-b4ad-c597448a082d.mp4";
                     new WorkoutIntro.DownloadFileFromURL().execute(url);
                     File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/","1.mp4");
                     File to = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
                     if(from.exists())
-                        from.renameTo(to);/*
+                        from.renameTo(to);
 
-                //Open a connection to that URL.
-                URLConnection ucon = url.openConnection();
-
-                File file = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
-                InputStream is = ucon.getInputStream();
-                BufferedInputStream inStream = new BufferedInputStream(is, 1024 * 5);
-                FileOutputStream outStream = new FileOutputStream(file);
-                byte[] buff = new byte[5 * 1024];
-
-                //Read bytes (and store them) until there is nothing more to read(-1)
-                int len;
-                while ((len = inStream.read(buff)) != -1)
-                {
-                    outStream.write(buff,0,len);
-                }
-
-                //clean up
-                outStream.flush();
-                outStream.close();
-                inStream.close();
 */
 
                     row++;
@@ -543,7 +527,7 @@ public class WorkoutIntro extends AppCompatActivity {
                     "[dbo].[Programs].[ID]='"+getIntent().getStringExtra("PROGID")+"'");
 
         File programsFile = new File(getExternalFilesDir(null).getAbsolutePath(),"programs.xls");
-
+            SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         if(!programsFile.exists()) {
             Workbook myWorkBook = new HSSFWorkbook();
             Cell c = null;
@@ -587,6 +571,9 @@ public class WorkoutIntro extends AppCompatActivity {
             c = headerRow.createCell(10);
             c.setCellValue("ProgramCategory");
             c.setCellStyle(cs);
+            c = headerRow.createCell(11);
+            c.setCellValue("UserID");
+            c.setCellStyle(cs);
             sheet1.setColumnWidth(0, (15 * 500));
             sheet1.setColumnWidth(1, (15 * 500));
             sheet1.setColumnWidth(2, (15 * 500));
@@ -598,6 +585,7 @@ public class WorkoutIntro extends AppCompatActivity {
             sheet1.setColumnWidth(8, (15 * 500));
             sheet1.setColumnWidth(9, (15 * 500));
             sheet1.setColumnWidth(10, (15 * 500));
+            sheet1.setColumnWidth(11, (15 * 500));
 
             FileOutputStream os = null;
             os = new FileOutputStream(programsFile);
@@ -637,6 +625,8 @@ public class WorkoutIntro extends AppCompatActivity {
                 c.setCellValue(selectProgram.getString("ProgramLevel"));
                 c = dataRow.createCell(10);
                 c.setCellValue(selectProgram.getString("ProgramCategory"));
+                c = dataRow.createCell(11);
+                c.setCellValue(sharedPref.getString("userId", ""));
             }
             os = new FileOutputStream(programsFile);
             myWorkBook.write(os);
