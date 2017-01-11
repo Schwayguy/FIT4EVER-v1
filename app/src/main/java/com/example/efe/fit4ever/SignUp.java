@@ -235,18 +235,26 @@ public class SignUp extends AppCompatActivity {
                     c.setCellStyle(cs);
 
                     c = headerRow.createCell(1);
-                    c.setCellValue("RecordDate");
+                    c.setCellValue("FatRatio");
                     c.setCellStyle(cs);
 
                     c = headerRow.createCell(2);
-                    c.setCellValue("ProgramID");
+                    c.setCellValue("MuscleRatio");
                     c.setCellStyle(cs);
 
                     c = headerRow.createCell(3);
-                    c.setCellValue("ProgramName");
+                    c.setCellValue("RecordDate");
                     c.setCellStyle(cs);
 
                     c = headerRow.createCell(4);
+                    c.setCellValue("ProgramID");
+                    c.setCellStyle(cs);
+
+                    c = headerRow.createCell(5);
+                    c.setCellValue("ProgramName");
+                    c.setCellStyle(cs);
+
+                    c = headerRow.createCell(6);
                     c.setCellValue("IsSent");
                     c.setCellStyle(cs);
 
@@ -256,6 +264,8 @@ public class SignUp extends AppCompatActivity {
                     sheet1.setColumnWidth(2, (15 * 500));
                     sheet1.setColumnWidth(3, (15 * 500));
                     sheet1.setColumnWidth(4, (15 * 500));
+                    sheet1.setColumnWidth(5, (15 * 500));
+                    sheet1.setColumnWidth(6, (15 * 500));
 
                     FileOutputStream os = null;
                     os = new FileOutputStream(weightFile);
