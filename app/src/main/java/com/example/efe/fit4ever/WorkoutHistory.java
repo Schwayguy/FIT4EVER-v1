@@ -165,35 +165,35 @@ public class WorkoutHistory extends AppCompatActivity {
                             String weightloss = cell1.toString();
                             String fatratio= cell5.toString();
                             String muscleratio=cell6.toString();
-                            int delta=abs(Integer.parseInt(cellw0.toString())-Integer.parseInt(cell1.toString()));
+                            float delta=abs(Float.parseFloat(cellw0.toString())-Float.parseFloat(cell1.toString()));
                             String height = sharedPref.getString("height", "");
                             float bmi = 0;
                             if(!height.isEmpty()) {
                                 bmi = Float.parseFloat(weightloss) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
                             }
                             Log.d("weights",cellw0.toString()+" "+cell1.toString()+" "+cellf0.toString()+" "+cell5.toString()+" "+cellm0.toString()+" "+cell6.toString());
-                            if((Integer.parseInt(cellw0.toString())<Integer.parseInt(cell1.toString()))&&(Integer.parseInt(cellf0.toString())<Integer.parseInt(cell5.toString()))&&(Integer.parseInt(cellm0.toString())<Integer.parseInt(cell6.toString()))&&(delta>=2)) {
+                            if((Float.parseFloat(cellw0.toString())<Float.parseFloat(cell1.toString()))&&(Float.parseFloat(cellf0.toString())<Float.parseFloat(cell5.toString()))&&(Float.parseFloat(cellm0.toString())<Float.parseFloat(cell6.toString()))&&(delta>=2)) {
                                 userweightinfo.setText(Html.fromHtml("| "+progname+" | "+date+" | "+"<font color=green>"+weightloss+ "</font>"+" | "+ bmi +" | "+"<font color=red>"+fatratio+ "</font>"+" | "+"<font color=green>"+muscleratio+ "</font>"+" | "));
                             }
-                            else if((Integer.parseInt(cellw0.toString())<Integer.parseInt(cell1.toString()))&&(Integer.parseInt(cellf0.toString())>Integer.parseInt(cell5.toString()))&&(Integer.parseInt(cellm0.toString())<Integer.parseInt(cell6.toString()))&&(delta>=2)) {
+                            else if((Float.parseFloat(cellw0.toString())<Float.parseFloat(cell1.toString()))&&(Float.parseFloat(cellf0.toString())>Float.parseFloat(cell5.toString()))&&(Float.parseFloat(cellm0.toString())<Float.parseFloat(cell6.toString()))&&(delta>=2)) {
                                 userweightinfo.setText(Html.fromHtml("| "+progname+" | "+date+" | "+"<font color=green>"+weightloss+ "</font>"+" | "+ bmi +" | "+"<font color=green>"+fatratio+ "</font>"+" | "+"<font color=green>"+muscleratio+ "</font>"+" | "));
                             }
-                            else if ((Integer.parseInt(cellw0.toString())<Integer.parseInt(cell1.toString()))&&(Integer.parseInt(cellf0.toString())<Integer.parseInt(cell5.toString()))&&(Integer.parseInt(cellm0.toString())>Integer.parseInt(cell6.toString()))&&(delta>=2)){
+                            else if ((Float.parseFloat(cellw0.toString())<Float.parseFloat(cell1.toString()))&&(Float.parseFloat(cellf0.toString())<Float.parseFloat(cell5.toString()))&&(Float.parseFloat(cellm0.toString())>Float.parseFloat(cell6.toString()))&&(delta>=2)){
                                 userweightinfo.setText(Html.fromHtml("| "+progname+" | "+date+" | "+"<font color=red>"+weightloss+ "</font>"+" | "+ bmi +" | "+"<font color=red>"+fatratio+ "</font>"+" | "+"<font color=red>"+muscleratio+ "</font>"+" | "));
                             }
-                            else if((Integer.parseInt(cellw0.toString())>Integer.parseInt(cell1.toString()))&&(Integer.parseInt(cellf0.toString())>Integer.parseInt(cell5.toString()))&&(Integer.parseInt(cellm0.toString())>Integer.parseInt(cell6.toString()))&&(delta>=2)) {
+                            else if((Float.parseFloat(cellw0.toString())>Float.parseFloat(cell1.toString()))&&(Float.parseFloat(cellf0.toString())>Float.parseFloat(cell5.toString()))&&(Float.parseFloat(cellm0.toString())>Float.parseFloat(cell6.toString()))&&(delta>=2)) {
                                 userweightinfo.setText(Html.fromHtml("| "+progname+" | "+date+" | "+"<font color=red>"+weightloss+ "</font>"+" | "+ bmi +" | "+"<font color=green>"+fatratio+ "</font>"+" | "+"<font color=red>"+muscleratio+ "</font>"+" | "));
                             }
-                            else if ((Integer.parseInt(cellw0.toString())>Integer.parseInt(cell1.toString()))&&(Integer.parseInt(cellf0.toString())>Integer.parseInt(cell5.toString()))&&(Integer.parseInt(cellm0.toString())<Integer.parseInt(cell6.toString()))&&(delta>=2)){
+                            else if ((Float.parseFloat(cellw0.toString())>Float.parseFloat(cell1.toString()))&&(Float.parseFloat(cellf0.toString())>Float.parseFloat(cell5.toString()))&&(Float.parseFloat(cellm0.toString())<Float.parseFloat(cell6.toString()))&&(delta>=2)){
                                 userweightinfo.setText(Html.fromHtml("| "+progname+" | "+date+" | "+"<font color=green>"+weightloss+ "</font>"+" | "+ bmi +" | "+"<font color=green>"+fatratio+ "</font>"+" | "+"<font color=green>"+muscleratio+ "</font>"+" | "));
                             }
-                            else if((Integer.parseInt(cellw0.toString())>Integer.parseInt(cell1.toString()))&&(Integer.parseInt(cellf0.toString())<Integer.parseInt(cell5.toString()))&&(Integer.parseInt(cellm0.toString())>Integer.parseInt(cell6.toString()))&&(delta>=2)) {
+                            else if((Float.parseFloat(cellw0.toString())>Float.parseFloat(cell1.toString()))&&(Float.parseFloat(cellf0.toString())<Float.parseFloat(cell5.toString()))&&(Float.parseFloat(cellm0.toString())>Float.parseFloat(cell6.toString()))&&(delta>=2)) {
                                 userweightinfo.setText(Html.fromHtml("| "+progname+" | "+date+" | "+"<font color=red>"+weightloss+ "</font>"+" | "+ bmi +" | "+"<font color=red>"+fatratio+ "</font>"+" | "+"<font color=red>"+muscleratio+ "</font>"+" | "));
                             }
-                            else if((Integer.parseInt(cellw0.toString())<Integer.parseInt(cell1.toString()))&&(Integer.parseInt(cellf0.toString())>Integer.parseInt(cell5.toString()))&&(Integer.parseInt(cellm0.toString())<Integer.parseInt(cell6.toString()))&&(delta>=2)) {
+                            else if((Float.parseFloat(cellw0.toString())<Float.parseFloat(cell1.toString()))&&(Float.parseFloat(cellf0.toString())>Float.parseFloat(cell5.toString()))&&(Float.parseFloat(cellm0.toString())<Float.parseFloat(cell6.toString()))&&(delta>=2)) {
                                 userweightinfo.setText(Html.fromHtml("| "+progname+" | "+date+" | "+"<font color=green>"+weightloss+ "</font>"+" | "+ bmi +" | "+"<font color=green>"+fatratio+ "</font>"+" | "+"<font color=green>"+muscleratio+ "</font>"+" | "));
                             }
-                            else if((Integer.parseInt(cellw0.toString())<Integer.parseInt(cell1.toString()))&&(Integer.parseInt(cellf0.toString())>Integer.parseInt(cell5.toString()))&&(Integer.parseInt(cellm0.toString())<Integer.parseInt(cell6.toString()))&&(delta>=2)) {
+                            else if((Float.parseFloat(cellw0.toString())<Float.parseFloat(cell1.toString()))&&(Float.parseFloat(cellf0.toString())>Float.parseFloat(cell5.toString()))&&(Float.parseFloat(cellm0.toString())<Float.parseFloat(cell6.toString()))&&(delta>=2)) {
                                 userweightinfo.setText(Html.fromHtml("| "+progname+" | "+date+" | "+"<font color=green>"+weightloss+ "</font>"+" | "+ bmi +" | "+"<font color=green>"+fatratio+ "</font>"+" | "+"<font color=green>"+muscleratio+ "</font>"+" | "));
                             }
                             else{

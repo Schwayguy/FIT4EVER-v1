@@ -315,7 +315,7 @@ public class MyWorkout extends AppCompatActivity {
                                 }
                             }
 
-                        Bitmap thumb = ThumbnailUtils.createVideoThumbnail("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4",
+                        Bitmap thumb = ThumbnailUtils.createVideoThumbnail("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+cell5.toString(),
                                 MediaStore.Video.Thumbnails.MINI_KIND);  //+cell5.toString()
                         thumb = Bitmap.createScaledBitmap(thumb, (int) (thumb.getWidth()), (int) (thumb.getHeight()), true);
                         ImageButton btn = new ImageButton(this);

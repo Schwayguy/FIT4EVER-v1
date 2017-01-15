@@ -30,7 +30,10 @@
                 android:layout_height="wrap_content"
                 android:dividerPadding="10dp"
                 android:elevation="0dp"
-                android:contextClickable="false" />
+                android:contextClickable="false"
+                android:orientation="horizontal"
+                style="@android:style/Widget.Holo.Light.TabWidget"
+                android:theme="@style/AppTheme" />
 
             <FrameLayout
                 android:id="@android:id/tabcontent"

@@ -82,7 +82,7 @@ public class ShowWorkout extends AppCompatActivity {
         workoutInfo.setText(cell3.toString());
 
         VideoView videoView = (VideoView) findViewById(R.id.videoView2);
-        videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4");//+cell6.toString()
+        videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+cell6.toString());
 
         videoView.start();
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {

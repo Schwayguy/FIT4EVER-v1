@@ -61,6 +61,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.ResultSet;
@@ -491,16 +492,11 @@ public class WorkoutIntro extends AppCompatActivity {
                     c = dataRow.createCell(9);
                     c.setCellValue(Integer.toString(workoutDownloadInfo.getInt("Queue")));
 
-/*
-                    String url = "http://fit4ever1.azurewebsites.net/Assets/Videos/17e2e578-4c00-4188-b4ad-c597448a082d.mp4";
-                    new WorkoutIntro.DownloadFileFromURL().execute(url);
-                    File from = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/","1.mp4");
-                    File to = new File("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+workoutDownloadInfo.getString("Video"));
-                    if(from.exists())
-                        from.renameTo(to);
-
-*/
-
+                    if(!workoutDownloadInfo.getString("Video").equals("rest.mp4")) {
+                        String url = "http://192.168.1.23:11124/Assets/Videos/"+workoutDownloadInfo.getString("Video");
+                        new WorkoutIntro.DownloadFileFromURL().execute(url);
+                    }
+                    Log.d("videoid", workoutDownloadInfo.getString("Video"));
                     row++;
                 }
                 os = new FileOutputStream(logFile);
@@ -726,7 +722,10 @@ public class WorkoutIntro extends AppCompatActivity {
                 InputStream input = new BufferedInputStream(url.openStream(), 8192);
 
                 // Output stream
-                OutputStream output = new FileOutputStream("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/1.mp4");
+                String video = url.getFile().toString();
+                video= video.replace("/Assets/Videos/","");
+               Log.d("fileanmevid",video);
+                OutputStream output = new FileOutputStream("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+video);
 
                 byte data[] = new byte[1024];
 
@@ -749,8 +748,14 @@ public class WorkoutIntro extends AppCompatActivity {
                 output.close();
                 input.close();
 
-            } catch (Exception e) {
-                Log.e("hatalı", e.getMessage());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
             }
 
             return null;
@@ -771,7 +776,7 @@ public class WorkoutIntro extends AppCompatActivity {
         @Override
         protected void onPostExecute(String file_url) {
             // dismiss the dialog after the file was downloaded
-            dismissDialog(progress_bar_type);
+            removeDialog(progress_bar_type);
         }
 
     }

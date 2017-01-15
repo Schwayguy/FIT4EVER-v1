@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TabHost;
+import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.text.format.Time;
@@ -115,8 +116,6 @@ public class MainActivity extends AppCompatActivity {
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String weight = sharedPref.getString("weight", "");
 
-
-
         String height = sharedPref.getString("height", "");
         bmiText = (TextView) findViewById(R.id.bmitext);
         if(!height.isEmpty()) {
@@ -184,38 +183,44 @@ public class MainActivity extends AppCompatActivity {
                 String searchString=searchText.getText().toString();
                 LinearLayout layout = (LinearLayout) findViewById(R.id.work1);
                 layout.removeAllViews();
-                if(inet!=null)
+                if(inet!=null) {
                     try {
                         ResultSet result;
-                        int level=0;
-                        if(levelString.equals("Beginner")){
-                            level=0;
+                        int level = 0;
+                        if (levelString.equals("Beginner")) {
+                            level = 0;
                             levelString = String.valueOf(level);
-                        }else if(levelString.equals("Intermediate")){
-                            level=1;
-                            levelString = String.valueOf(level);}
-                        else if(levelString.equals("Advanced")){
-                            level=2;
-                            levelString = String.valueOf(level);}
-
-                        int category=0;
-                        if(classString.equals("Agility")){
-                            category=0;
+                        } else if (levelString.equals("Intermediate")) {
+                            level = 1;
+                            levelString = String.valueOf(level);
+                        } else if (levelString.equals("Advanced")) {
+                            level = 2;
+                            levelString = String.valueOf(level);
+                        }
+                        if(rateString.equals("")){
+                            rateString="";
+                        }else{
+                            rateString=String.valueOf(Math.round(Float.parseFloat(rateString)));
+                        }
+                        int category = 0;
+                        if (classString.equals("Agility")) {
+                            category = 0;
                             classString = String.valueOf(category);
-                        }else if(classString.equals("Strength")){
-                            category=1;
-                            classString = String.valueOf(category);}
-                        else if(classString.equals("Fitness")){
-                            category=2;
-                            classString = String.valueOf(category);}
-                        else if(classString.equals("Fat-burning")){
-                            category=3;
-                            classString = String.valueOf(category);}
+                        } else if (classString.equals("Strength")) {
+                            category = 1;
+                            classString = String.valueOf(category);
+                        } else if (classString.equals("Fitness")) {
+                            category = 2;
+                            classString = String.valueOf(category);
+                        } else if (classString.equals("Fat-burning")) {
+                            category = 3;
+                            classString = String.valueOf(category);
+                        }
 
-                        if(searchSpinString.equals("Program")) {
+                        if (searchSpinString.equals("Program")) {
                             result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
                                     " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%'");
-                        }else{
+                        } else {
                             result = statement.executeQuery("select Programs.ID, Programs.Title from Programs INNER JOIN Users on Programs.IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
                                     " AND ProgramCategory LIKE '%" + classString + "%' AND Users.Username LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Users].[ID]=[dbo].[Programs].[Creator]");
                         }
@@ -224,8 +229,8 @@ public class MainActivity extends AppCompatActivity {
                         while (result.next()) {
                             Button btnTag = new Button(getApplicationContext());
                             btnTag.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-                            btnTag.setText(result.getString("Title") );
-                            btnTag.setPadding(0,10,0,0);
+                            btnTag.setText(result.getString("Title"));
+                            btnTag.setPadding(0, 10, 0, 0);
 
                             layout.addView(btnTag);
                             final String progId = result.getString("ID");
@@ -244,6 +249,9 @@ public class MainActivity extends AppCompatActivity {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
+                }else{
+                    Toast.makeText(getApplicationContext(),"You need internet connection to search programs.",Toast.LENGTH_SHORT).show();
+                }
 
             }
         });
@@ -580,7 +588,6 @@ public class MainActivity extends AppCompatActivity {
 
          } catch (SQLException e) {
              Log.e("ERROR", e.getMessage());
-             Toast.makeText(this,"Can't access the server.",Toast.LENGTH_SHORT).show();
          } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
