@@ -59,7 +59,7 @@ public class ShowWorkout extends AppCompatActivity {
             Cell cell6 = row.getCell(videoRef.getCol());
             int minute =0;
             int seconds=0;
-            if(Float.parseFloat(cell5.toString()) > 30) {
+            if(Float.parseFloat(cell5.toString()) >= 30) {
                 seconds = (int) Float.parseFloat(cell5.toString());
                 if (Float.parseFloat(cell5.toString()) >= 60) {
                     minute = (int) (Float.parseFloat(cell5.toString()) / 60);

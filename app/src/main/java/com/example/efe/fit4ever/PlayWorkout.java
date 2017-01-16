@@ -93,7 +93,7 @@ public class PlayWorkout extends AppCompatActivity {
 
             int minute =0;
             int seconds=0;
-            if(Float.parseFloat(cell5.toString()) > 30) {
+            if(Float.parseFloat(cell5.toString()) >= 30) {
                 seekBar.setVisibility(View.VISIBLE);
                 seconds = (int) Float.parseFloat(cell5.toString());
                 if(Float.parseFloat(cell5.toString()) >= 60){
@@ -143,7 +143,7 @@ public class PlayWorkout extends AppCompatActivity {
             workoutInfo.setText(cell3.toString());
 
             VideoView videoView = (VideoView) findViewById(R.id.videoView);
-            videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/67.mp4");//+cell6.toString()
+            videoView.setVideoPath("/storage/emulated/0/Android/data/com.example.efe.fit4ever/files/"+cell6.toString());//
 
             videoView.start();
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -175,16 +175,13 @@ public class PlayWorkout extends AppCompatActivity {
                             i++;
                             j = 0;
                         }
-                        else if (j+1 > Integer.parseInt(cell4.toString())) {
+                        else if (j+2 > Integer.parseInt(cell4.toString())) {
                             j = 0;
                             i++;
                         } else {
                             j++;
                         }
                         Log.d("aaab", String.valueOf(j)+" "+cell4.toString()+" "+cell2.toString()+" "+String.valueOf(i));
-
-
-
 
                          if(cell2.toString().equals("Rest")){
                              Intent intent = new Intent(getBaseContext(), Rest.class);
@@ -195,7 +192,7 @@ public class PlayWorkout extends AppCompatActivity {
 
                              int minute =0;
                              int seconds=0;
-                            if(Float.parseFloat(cell5.toString()) > 30) {
+                            if(Float.parseFloat(cell5.toString()) >= 30) {
                                 seekBar.setVisibility(View.VISIBLE);
                                 seconds = (int) Float.parseFloat(cell5.toString());
                                 if(Float.parseFloat(cell5.toString()) >= 60){
@@ -231,7 +228,7 @@ public class PlayWorkout extends AppCompatActivity {
                                 }.start();
 
                             }
-                             if(Float.parseFloat(cell4.toString()) > 30) {
+                             if(Float.parseFloat(cell4.toString()) >= 30) {
                                  seekBar.setVisibility(View.VISIBLE);
                                  seconds = (int) Float.parseFloat(cell5.toString());
                                  if(Float.parseFloat(cell4.toString()) >= 60){

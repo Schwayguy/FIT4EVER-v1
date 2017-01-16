@@ -216,13 +216,20 @@ public class MainActivity extends AppCompatActivity {
                             category = 3;
                             classString = String.valueOf(category);
                         }
-
-                        if (searchSpinString.equals("Program")) {
-                            result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
-                                    " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%'");
-                        } else {
-                            result = statement.executeQuery("select Programs.ID, Programs.Title from Programs INNER JOIN Users on Programs.IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
-                                    " AND ProgramCategory LIKE '%" + classString + "%' AND Users.Username LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Users].[ID]=[dbo].[Programs].[Creator]");
+                        String userId=sharedPref.getString("userId", "");
+                        String role=sharedPref.getString("role", "");
+                        if(role.equals("2")){
+                            result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where ProgramLevel LIKE '%" + levelString + "%'" +
+                                    " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Programs].[Creator]='"+userId+"'");
+                        }
+                        else {
+                            if (searchSpinString.equals("Program")) {
+                                result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
+                                        " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%'");
+                            } else {
+                                result = statement.executeQuery("select Programs.ID, Programs.Title from Programs INNER JOIN Users on Programs.IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
+                                        " AND ProgramCategory LIKE '%" + classString + "%' AND Users.Username LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Users].[ID]=[dbo].[Programs].[Creator]");
+                            }
                         }
                         assert result != null;
                         result.beforeFirst();
@@ -383,207 +390,210 @@ public class MainActivity extends AppCompatActivity {
              if(!loginRes.next()){
               Toast.makeText(this,"Wrong email or password.",Toast.LENGTH_SHORT).show();
              }else {
-                  editor.putString("lastLoginDate", calendar.get(Calendar.YEAR) + "-" +  String.valueOf(calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH));
-                  editor.putString("userId", loginRes.getString("ID"));
-                  editor.putString("username", loginRes.getString("Username"));
-                  editor.putString("email", usernameField.getText().toString());
-                  editor.putString("password", passwordField.getText().toString());
-                  editor.putString("weight", loginRes.getString("Weight"));
-                  editor.putString("height", loginRes.getString("Height"));
-                  editor.putString("role", loginRes.getString("Role"));
-                  editor.apply();
+                 editor.putString("lastLoginDate", calendar.get(Calendar.YEAR) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH));
+                 editor.putString("userId", loginRes.getString("ID"));
+                 editor.putString("username", loginRes.getString("Username"));
+                 editor.putString("email", usernameField.getText().toString());
+                 editor.putString("password", passwordField.getText().toString());
+                 editor.putString("weight", loginRes.getString("Weight"));
+                 editor.putString("height", loginRes.getString("Height"));
+                 editor.putString("role", loginRes.getString("Role"));
+                 editor.apply();
+
+                 String role = sharedPref.getString("role", "");
+                 if (!role.equals("2")) {
+
+                     File weightFile = new File(getExternalFilesDir(null).getAbsolutePath(), loginRes.getString("ID") + ".xls");
+                     File usersFile = new File(getExternalFilesDir(null).getAbsolutePath(), "users.xls");
+                     if (!weightFile.exists()) {
+                         Workbook wb = new HSSFWorkbook();
+                         Cell c = null;
+                         CellStyle cs = wb.createCellStyle();
+                         cs.setFillForegroundColor(HSSFColor.LIME.index);
+                         cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+
+                         Sheet sheet1 = null;
+                         sheet1 = wb.createSheet("Weight Changes");
+
+                         Row headerRow = sheet1.createRow(0);
+
+                         c = headerRow.createCell(0);
+                         c.setCellValue("WeightLoss");
+                         c.setCellStyle(cs);
+
+                         c = headerRow.createCell(1);
+                         c.setCellValue("FatRatio");
+                         c.setCellStyle(cs);
+
+                         c = headerRow.createCell(2);
+                         c.setCellValue("MuscleRatio");
+                         c.setCellStyle(cs);
+
+                         c = headerRow.createCell(3);
+                         c.setCellValue("RecordDate");
+                         c.setCellStyle(cs);
+
+                         c = headerRow.createCell(4);
+                         c.setCellValue("ProgramID");
+                         c.setCellStyle(cs);
+
+                         c = headerRow.createCell(5);
+                         c.setCellValue("ProgramName");
+                         c.setCellStyle(cs);
+
+                         c = headerRow.createCell(6);
+                         c.setCellValue("IsSent");
+                         c.setCellStyle(cs);
 
 
-                 File weightFile = new File(getExternalFilesDir(null).getAbsolutePath(),loginRes.getString("ID") + ".xls");
-                 File usersFile = new File(getExternalFilesDir(null).getAbsolutePath(),"users.xls");
-                 if(!weightFile.exists()) {
-                     Workbook wb = new HSSFWorkbook();
-                     Cell c = null;
-                     CellStyle cs = wb.createCellStyle();
-                     cs.setFillForegroundColor(HSSFColor.LIME.index);
-                     cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+                         sheet1.setColumnWidth(0, (15 * 500));
+                         sheet1.setColumnWidth(1, (15 * 500));
+                         sheet1.setColumnWidth(2, (15 * 500));
+                         sheet1.setColumnWidth(3, (15 * 500));
+                         sheet1.setColumnWidth(4, (15 * 500));
+                         sheet1.setColumnWidth(5, (15 * 500));
+                         sheet1.setColumnWidth(6, (15 * 500));
 
-                     Sheet sheet1 = null;
-                     sheet1 = wb.createSheet("Weight Changes");
+                         ResultSet userHistoryInfo = statement.executeQuery("USE [Workout] SELECT WeightLoss,RecordDate, ProgramID,Title, FatRatio, MuscleRatio from [UserWeightChangeLog] INNER JOIN [Programs] on UserID='" + loginRes.getString("ID") + "'" +
+                                 "and [dbo].[Programs].[ID]=[dbo].[UserWeightChangeLog].[ProgramID] ");
+                         int row = 1;
+                         while (userHistoryInfo.next()) {
+                             Row dataRow = sheet1.createRow(row);
 
-                     Row headerRow = sheet1.createRow(0);
+                             c = dataRow.createCell(0);
+                             c.setCellValue(userHistoryInfo.getString("WeightLoss"));
+                             c = dataRow.createCell(1);
+                             c.setCellValue(userHistoryInfo.getString("FatRatio"));
+                             c = dataRow.createCell(2);
+                             c.setCellValue(userHistoryInfo.getString("MuscleRatio"));
+                             c = dataRow.createCell(3);
+                             c.setCellValue(userHistoryInfo.getString("RecordDate"));
+                             c = dataRow.createCell(4);
+                             c.setCellValue(userHistoryInfo.getString("ProgramID"));
+                             c = dataRow.createCell(5);
+                             c.setCellValue(userHistoryInfo.getString("Title"));
+                             c = dataRow.createCell(6);
+                             c.setCellValue(1);
+                             row++;
+                         }
+                         FileOutputStream os = null;
+                         os = new FileOutputStream(weightFile);
+                         wb.write(os);
 
-                     c = headerRow.createCell(0);
-                     c.setCellValue("WeightLoss");
-                     c.setCellStyle(cs);
+                     }
+                     if (!usersFile.exists()) {
+                         Workbook wb = new HSSFWorkbook();
+                         Cell c = null;
+                         CellStyle cs = wb.createCellStyle();
+                         cs.setFillForegroundColor(HSSFColor.LIME.index);
+                         cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
 
-                     c = headerRow.createCell(1);
-                     c.setCellValue("FatRatio");
-                     c.setCellStyle(cs);
+                         Sheet sheet1 = null;
+                         sheet1 = wb.createSheet("Users Infos");
 
-                     c = headerRow.createCell(2);
-                     c.setCellValue("MuscleRatio");
-                     c.setCellStyle(cs);
+                         Row headerRow = sheet1.createRow(0);
 
-                     c = headerRow.createCell(3);
-                     c.setCellValue("RecordDate");
-                     c.setCellStyle(cs);
-
-                     c = headerRow.createCell(4);
-                     c.setCellValue("ProgramID");
-                     c.setCellStyle(cs);
-
-                     c = headerRow.createCell(5);
-                     c.setCellValue("ProgramName");
-                     c.setCellStyle(cs);
-
-                     c = headerRow.createCell(6);
-                     c.setCellValue("IsSent");
-                     c.setCellStyle(cs);
-
-
-                     sheet1.setColumnWidth(0, (15 * 500));
-                     sheet1.setColumnWidth(1, (15 * 500));
-                     sheet1.setColumnWidth(2, (15 * 500));
-                     sheet1.setColumnWidth(3, (15 * 500));
-                     sheet1.setColumnWidth(4, (15 * 500));
-                     sheet1.setColumnWidth(5, (15 * 500));
-                     sheet1.setColumnWidth(6, (15 * 500));
-
-                     ResultSet userHistoryInfo= statement.executeQuery("USE [Workout] SELECT WeightLoss,RecordDate, ProgramID,Title, FatRatio, MuscleRatio from [UserWeightChangeLog] INNER JOIN [Programs] on UserID='"+loginRes.getString("ID")+"'" +
-                             "and [dbo].[Programs].[ID]=[dbo].[UserWeightChangeLog].[ProgramID] ");
-                     int row = 1;
-                     while (userHistoryInfo.next()) {
+                         c = headerRow.createCell(0);
+                         c.setCellValue("Email");
+                         c.setCellStyle(cs);
+                         c = headerRow.createCell(1);
+                         c.setCellValue("Password");
+                         c.setCellStyle(cs);
+                         c = headerRow.createCell(2);
+                         c.setCellValue("ID");
+                         c.setCellStyle(cs);
+                         c = headerRow.createCell(3);
+                         c.setCellValue("Username");
+                         c.setCellStyle(cs);
+                         c = headerRow.createCell(4);
+                         c.setCellValue("Weight");
+                         c.setCellStyle(cs);
+                         c = headerRow.createCell(5);
+                         c.setCellValue("Height");
+                         c.setCellStyle(cs);
+                         c = headerRow.createCell(6);
+                         c.setCellValue("Role");
+                         c.setCellStyle(cs);
+                         sheet1.setColumnWidth(0, (15 * 500));
+                         sheet1.setColumnWidth(1, (15 * 500));
+                         sheet1.setColumnWidth(2, (15 * 500));
+                         sheet1.setColumnWidth(3, (15 * 500));
+                         sheet1.setColumnWidth(4, (15 * 500));
+                         sheet1.setColumnWidth(5, (15 * 500));
+                         sheet1.setColumnWidth(6, (15 * 500));
+                         int row = 1;
                          Row dataRow = sheet1.createRow(row);
 
                          c = dataRow.createCell(0);
-                         c.setCellValue(userHistoryInfo.getString("WeightLoss"));
+                         c.setCellValue(usernameField.getText().toString());
                          c = dataRow.createCell(1);
-                         c.setCellValue(userHistoryInfo.getString("FatRatio"));
+                         c.setCellValue(passbuffer.toString());
                          c = dataRow.createCell(2);
-                         c.setCellValue(userHistoryInfo.getString("MuscleRatio"));
+                         c.setCellValue(loginRes.getString("ID"));
                          c = dataRow.createCell(3);
-                         c.setCellValue(userHistoryInfo.getString("RecordDate"));
+                         c.setCellValue(loginRes.getString("Username"));
                          c = dataRow.createCell(4);
-                         c.setCellValue(userHistoryInfo.getString("ProgramID"));
+                         c.setCellValue(loginRes.getString("Weight"));
                          c = dataRow.createCell(5);
-                         c.setCellValue(userHistoryInfo.getString("Title"));
+                         c.setCellValue(loginRes.getString("Height"));
                          c = dataRow.createCell(6);
-                         c.setCellValue(1);
-                         row++;
-                     }
-                     FileOutputStream os = null;
-                     os = new FileOutputStream(weightFile);
-                     wb.write(os);
-
-                 }
-                 if(!usersFile.exists()){
-                     Workbook wb = new HSSFWorkbook();
-                     Cell c = null;
-                     CellStyle cs = wb.createCellStyle();
-                     cs.setFillForegroundColor(HSSFColor.LIME.index);
-                     cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-
-                     Sheet sheet1 = null;
-                     sheet1 = wb.createSheet("Users Infos");
-
-                     Row headerRow = sheet1.createRow(0);
-
-                     c = headerRow.createCell(0);
-                     c.setCellValue("Email");
-                     c.setCellStyle(cs);
-                     c = headerRow.createCell(1);
-                     c.setCellValue("Password");
-                     c.setCellStyle(cs);
-                     c = headerRow.createCell(2);
-                     c.setCellValue("ID");
-                     c.setCellStyle(cs);
-                     c = headerRow.createCell(3);
-                     c.setCellValue("Username");
-                     c.setCellStyle(cs);
-                     c = headerRow.createCell(4);
-                     c.setCellValue("Weight");
-                     c.setCellStyle(cs);
-                     c = headerRow.createCell(5);
-                     c.setCellValue("Height");
-                     c.setCellStyle(cs);
-                     c = headerRow.createCell(6);
-                     c.setCellValue("Role");
-                     c.setCellStyle(cs);
-                     sheet1.setColumnWidth(0, (15 * 500));
-                     sheet1.setColumnWidth(1, (15 * 500));
-                     sheet1.setColumnWidth(2, (15 * 500));
-                     sheet1.setColumnWidth(3, (15 * 500));
-                     sheet1.setColumnWidth(4, (15 * 500));
-                     sheet1.setColumnWidth(5, (15 * 500));
-                     sheet1.setColumnWidth(6, (15 * 500));
-                     int row = 1;
-                     Row dataRow = sheet1.createRow(row);
-
-                     c = dataRow.createCell(0);
-                     c.setCellValue(usernameField.getText().toString());
-                     c = dataRow.createCell(1);
-                     c.setCellValue(passbuffer.toString());
-                     c = dataRow.createCell(2);
-                     c.setCellValue(loginRes.getString("ID"));
-                     c = dataRow.createCell(3);
-                     c.setCellValue(loginRes.getString("Username"));
-                     c = dataRow.createCell(4);
-                     c.setCellValue(loginRes.getString("Weight"));
-                     c = dataRow.createCell(5);
-                     c.setCellValue(loginRes.getString("Height"));
-                     c = dataRow.createCell(6);
-                     c.setCellValue(loginRes.getString("Role"));
-                     FileOutputStream os = null;
-                     os = new FileOutputStream(usersFile);
-                     wb.write(os);
-                 }else{
-                     FileInputStream myInput = null;
-                     myInput = new FileInputStream(usersFile);
-                     POIFSFileSystem myFileSystem = null;
-                     myFileSystem = new POIFSFileSystem(myInput);
-                     HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
-                     final HSSFSheet mySheet = myWorkBook.getSheetAt(0);
-                     final int rowNumber = mySheet.getPhysicalNumberOfRows();
-                     int i=2;
-                     CellReference idRef = new CellReference("C" + i);
-                     Row row = mySheet.getRow(idRef.getRow());
-                     Cell cell1 = row.getCell(idRef.getCol());
-                     while((!cell1.toString().equals(loginRes.getString("ID")))&&(i<rowNumber)){
-                         i++;
-                         idRef = new CellReference("C" + i);
-                         row = mySheet.getRow(idRef.getRow());
-                         cell1 = row.getCell(idRef.getCol());
-                     }
-                     if (cell1.toString().equals(loginRes.getString("ID")))    {
-                         CellReference weightRef = new CellReference("E" + i);
-                         Cell cell2 = row.getCell(weightRef.getCol());
-                         cell2.setCellValue(loginRes.getString("Weight"));
+                         c.setCellValue(loginRes.getString("Role"));
                          FileOutputStream os = null;
                          os = new FileOutputStream(usersFile);
-                         myWorkBook.write(os);
-                     }else{
+                         wb.write(os);
+                     } else {
+                         FileInputStream myInput = null;
+                         myInput = new FileInputStream(usersFile);
+                         POIFSFileSystem myFileSystem = null;
+                         myFileSystem = new POIFSFileSystem(myInput);
+                         HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                         final HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                         final int rowNumber = mySheet.getPhysicalNumberOfRows();
+                         int i = 2;
+                         CellReference idRef = new CellReference("C" + i);
+                         Row row = mySheet.getRow(idRef.getRow());
+                         Cell cell1 = row.getCell(idRef.getCol());
+                         while ((!cell1.toString().equals(loginRes.getString("ID"))) && (i < rowNumber)) {
+                             i++;
+                             idRef = new CellReference("C" + i);
+                             row = mySheet.getRow(idRef.getRow());
+                             cell1 = row.getCell(idRef.getCol());
+                         }
+                         if (cell1.toString().equals(loginRes.getString("ID"))) {
+                             CellReference weightRef = new CellReference("E" + i);
+                             Cell cell2 = row.getCell(weightRef.getCol());
+                             cell2.setCellValue(loginRes.getString("Weight"));
+                             FileOutputStream os = null;
+                             os = new FileOutputStream(usersFile);
+                             myWorkBook.write(os);
+                         } else {
 
-                     FileOutputStream os = null;
-                     Cell c = null;
-                     Row dataRow = mySheet.createRow(rowNumber);
-                     c = dataRow.createCell(0);
-                     c.setCellValue(usernameField.getText().toString());
-                     c = dataRow.createCell(1);
-                     c.setCellValue(passbuffer.toString());
-                     c = dataRow.createCell(2);
-                     c.setCellValue(loginRes.getString("ID"));
-                     c = dataRow.createCell(3);
-                     c.setCellValue(loginRes.getString("Username"));
-                     c = dataRow.createCell(4);
-                     c.setCellValue(loginRes.getString("Weight"));
-                     c = dataRow.createCell(5);
-                     c.setCellValue(loginRes.getString("Height"));
-                     c = dataRow.createCell(6);
-                     c.setCellValue(loginRes.getString("Role"));
-                     os = new FileOutputStream(usersFile);
-                     myWorkBook.write(os);
-                     os.close();
+                             FileOutputStream os = null;
+                             Cell c = null;
+                             Row dataRow = mySheet.createRow(rowNumber);
+                             c = dataRow.createCell(0);
+                             c.setCellValue(usernameField.getText().toString());
+                             c = dataRow.createCell(1);
+                             c.setCellValue(passbuffer.toString());
+                             c = dataRow.createCell(2);
+                             c.setCellValue(loginRes.getString("ID"));
+                             c = dataRow.createCell(3);
+                             c.setCellValue(loginRes.getString("Username"));
+                             c = dataRow.createCell(4);
+                             c.setCellValue(loginRes.getString("Weight"));
+                             c = dataRow.createCell(5);
+                             c.setCellValue(loginRes.getString("Height"));
+                             c = dataRow.createCell(6);
+                             c.setCellValue(loginRes.getString("Role"));
+                             os = new FileOutputStream(usersFile);
+                             myWorkBook.write(os);
+                             os.close();
+                         }
+                     }
                  }
-                 }
-                  finish();
-                  startActivity(getIntent());
-               //   displayData(view);
+                 finish();
+                 startActivity(getIntent());
+                 //   displayData(view);
              }
 
          } catch (SQLException e) {
@@ -682,11 +692,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void SeeHistory(View view){
-        Intent intent = new Intent(getBaseContext(), WorkoutHistory.class);
-        startActivity(intent);
+        String role = sharedPref.getString("role", "");
+        if (!role.equals("2")) {
+            Intent intent = new Intent(getBaseContext(), WorkoutHistory.class);
+            startActivity(intent);
+        }else{
+            Toast.makeText(this,"Trainers aren't allowed to change their body information.",Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void setWeight(View view) {
+        String role = sharedPref.getString("role", "");
+        if (!role.equals("2")) {
         EditText weightText = (EditText) findViewById(R.id.weightText);
         String wT = weightText.getText().toString();
         EditText fatText = (EditText) findViewById(R.id.fatText);
@@ -697,7 +714,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!wT.isEmpty()) {
             try {
-                ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+                ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo inet = conMgr.getActiveNetworkInfo();
                 if (inet != null) {
                     try {
@@ -708,8 +725,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                     statement.executeUpdate("update Users set Weight=" + wT + " where ID ='" + sharedPref.getString("userId", "") + "'");
                 }
-                File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "")+ ".xls");
-                if(weightFile.exists()) {
+                File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
+                if (weightFile.exists()) {
                     FileInputStream myInput = null;
                     myInput = new FileInputStream(weightFile);
                     POIFSFileSystem myFileSystem = null;
@@ -727,7 +744,7 @@ public class MainActivity extends AppCompatActivity {
                     c = dataRow.createCell(2);
                     c.setCellValue(mT);
                     c = dataRow.createCell(3);
-                    c.setCellValue(calendar.get(Calendar.YEAR) + "-" +  String.valueOf(calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH));
+                    c.setCellValue(calendar.get(Calendar.YEAR) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH));
                     c = dataRow.createCell(4);
                     c.setCellValue(sharedPref.getString("progId", ""));
                     c = dataRow.createCell(5);
@@ -740,7 +757,7 @@ public class MainActivity extends AppCompatActivity {
                     os.close();
                 }
                 File usersFile = new File(getExternalFilesDir(null), "users.xls");
-                if(weightFile.exists()) {
+                if (weightFile.exists()) {
                     FileInputStream myInput = null;
                     myInput = new FileInputStream(usersFile);
                     POIFSFileSystem myFileSystem = null;
@@ -749,11 +766,11 @@ public class MainActivity extends AppCompatActivity {
                     final HSSFSheet mySheet = myWorkBook.getSheetAt(0);
                     final int rowNumber = mySheet.getPhysicalNumberOfRows();
                     FileOutputStream os = null;
-                    int i=2;
+                    int i = 2;
                     CellReference idRef = new CellReference("C" + i);
                     Row row = mySheet.getRow(idRef.getRow());
                     Cell cell1 = row.getCell(idRef.getCol());
-                    while(!cell1.toString().equals(sharedPref.getString("userId", ""))){
+                    while (!cell1.toString().equals(sharedPref.getString("userId", ""))) {
                         i++;
                         idRef = new CellReference("C" + i);
                         row = mySheet.getRow(idRef.getRow());
@@ -768,8 +785,7 @@ public class MainActivity extends AppCompatActivity {
                     os.close();
                 }
 
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 Log.e("ERROR", e.getMessage());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -781,11 +797,11 @@ public class MainActivity extends AppCompatActivity {
             mgr.hideSoftInputFromWindow(weightText.getWindowToken(), 0);
             Toast.makeText(getApplicationContext(), wT, Toast.LENGTH_LONG).show();
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("weight",wT);
+            editor.putString("weight", wT);
             editor.apply();
-
-
         }
+
+
         ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo inet = conMgr.getActiveNetworkInfo();
         if(inet!= null) {
@@ -844,6 +860,9 @@ public class MainActivity extends AppCompatActivity {
 
         finish();
         startActivity(getIntent());
+        }else{
+            Toast.makeText(this,"Trainers aren't allowed to change their body information.",Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void startSignUp(View view) {

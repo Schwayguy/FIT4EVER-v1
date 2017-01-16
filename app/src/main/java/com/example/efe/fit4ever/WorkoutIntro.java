@@ -362,21 +362,23 @@ public class WorkoutIntro extends AppCompatActivity {
 
         if(!userId.isEmpty()) {
             try {
-                ResultSet tryWorkoutPurchase = statement.executeQuery("USE [Workout] SELECT * FROM [dbo].[UPRelation] where [UserID] ='" + userId + "' AND [ProgramId]='" + getIntent().getStringExtra("PROGID") + "'");
-                if (!tryWorkoutPurchase.next()) {
-                    statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UPRelation] ([ID] ,[ProgramID],[UserID],[RegisterDate]) VALUES" +
-                            " ('" + uniqueID + "','" + getIntent().getStringExtra("PROGID") + "','" + userId + "','" + calendar.get(Calendar.YEAR) + "-" +  String.valueOf(calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "')");
-                    statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Programs] SET IsEditable=0 where ID='"+ getIntent().getStringExtra("PROGID")+"')");
-                    Toast.makeText(this, "Program purchased.", Toast.LENGTH_SHORT).show();
+                String role = sharedPref.getString("role", "");
+                if (!role.equals("2")) {
+                    ResultSet tryWorkoutPurchase = statement.executeQuery("USE [Workout] SELECT * FROM [dbo].[UPRelation] where [UserID] ='" + userId + "' AND [ProgramId]='" + getIntent().getStringExtra("PROGID") + "'");
+                    if (!tryWorkoutPurchase.next()) {
+                        statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UPRelation] ([ID] ,[ProgramID],[UserID],[RegisterDate]) VALUES" +
+                                " ('" + uniqueID + "','" + getIntent().getStringExtra("PROGID") + "','" + userId + "','" + calendar.get(Calendar.YEAR) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "')");
+                        statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Programs] SET IsEditable=0 where ID='" + getIntent().getStringExtra("PROGID") + "')");
+                        Toast.makeText(this, "Program purchased.", Toast.LENGTH_SHORT).show();
 
 
-                    //MyWorkout'a gönder
+                        //MyWorkout'a gönder
 
 
-                } else {
-                    Toast.makeText(this, "You already own this workout.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "You already own this workout.", Toast.LENGTH_SHORT).show();
+                    }
                 }
-
                 Download();
             } catch (SQLException e) {
                 Log.e("ERRORp", e.getMessage());
