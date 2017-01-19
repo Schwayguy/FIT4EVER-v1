@@ -66,7 +66,11 @@ public class ShowWorkout extends AppCompatActivity {
                     seconds = (int) (Float.parseFloat(cell5.toString()) % 60);
                 }
                 TextView repcount = (TextView) findViewById(R.id.repcount2);
-                repcount.setText(minute + ":"+ seconds);
+                if(seconds>=10){
+                repcount.setText("Repeat for "+minute + ":"+ seconds);
+                }else{
+                    repcount.setText("Repeat for "+minute + ":0"+ seconds);
+                }
             }else {
 
             TextView repcount = (TextView) findViewById(R.id.repcount2);

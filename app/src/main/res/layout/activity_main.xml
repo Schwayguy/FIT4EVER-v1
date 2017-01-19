@@ -63,7 +63,6 @@
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_gravity="right"
-                        android:layout_marginTop="10dp"
                         android:weightSum="1"
                         android:layout_height="wrap_content">
 
@@ -81,7 +80,7 @@
                             android:id="@+id/weightText"
                             android:layout_marginTop="20dp"
                             android:inputType="number"
-                            android:layout_marginLeft="10dp"
+                            android:layout_marginLeft="22dp"
                             android:focusableInTouchMode="true"
                             android:focusable="true"
                             android:singleLine="true"
@@ -102,7 +101,6 @@
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_gravity="right"
-                        android:layout_marginTop="10dp"
                         android:weightSum="1"
                         android:layout_height="wrap_content">
 
@@ -111,16 +109,14 @@
                             android:layout_height="wrap_content"
                             android:textAppearance="?android:attr/textAppearanceMedium"
                             android:text="Current Fat Ratio : "
-                            android:id="@+id/textView16"
-                            android:layout_marginTop="20dp" />
+                            android:id="@+id/textView16" />
 
                         <EditText
                             android:layout_width="60dp"
                             android:layout_height="wrap_content"
                             android:id="@+id/fatText"
-                            android:layout_marginTop="20dp"
                             android:inputType="number"
-                            android:layout_marginLeft="10dp"
+                            android:layout_marginLeft="42dp"
                             android:focusableInTouchMode="true"
                             android:focusable="true"
                             android:singleLine="true"
@@ -133,7 +129,6 @@
                         android:orientation="horizontal"
                         android:layout_width="match_parent"
                         android:layout_gravity="right"
-                        android:layout_marginTop="10dp"
                         android:weightSum="1"
                         android:layout_height="wrap_content">
 
@@ -142,14 +137,13 @@
                             android:layout_height="wrap_content"
                             android:textAppearance="?android:attr/textAppearanceMedium"
                             android:text="Current Muscle Ratio : "
-                            android:id="@+id/textView6"
-                            android:layout_marginTop="20dp" />
+                            android:id="@+id/textView6" />
 
                         <EditText
                             android:layout_width="60dp"
                             android:layout_height="wrap_content"
                             android:id="@+id/muscleText"
-                            android:layout_marginTop="20dp"
+                            android:layout_marginTop="0dp"
                             android:inputType="number"
                             android:layout_marginLeft="10dp"
                             android:focusableInTouchMode="true"

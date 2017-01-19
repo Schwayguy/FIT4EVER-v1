@@ -43,6 +43,7 @@ public class PlayWorkout extends AppCompatActivity {
     private GoogleApiClient client;
     int i ;
     int j ;
+    int k;
     Cell cell4;
     Cell cell5;
     CountDownTimer yourCountDownTimer;
@@ -90,7 +91,8 @@ public class PlayWorkout extends AppCompatActivity {
                 i++;
                 j = 0;
             }
-
+            final TextView periodcount = (TextView) findViewById(R.id.periodcount);
+            periodcount.setText("Period No: "+String.valueOf(1));
             int minute =0;
             int seconds=0;
             if(Float.parseFloat(cell5.toString()) >= 30) {
@@ -101,6 +103,7 @@ public class PlayWorkout extends AppCompatActivity {
                     seconds = (int) (Float.parseFloat(cell5.toString())%60);
                 }
                 final TextView repcount = (TextView) findViewById(R.id.repcount);
+
                 final int finalSeconds = seconds;
                 final int finalMinute = minute;
                 CountDownTimer yourCountDownTimer= new  CountDownTimer((long) (1000 * (Float.parseFloat(cell5.toString()) + 1.0)), 1000) {
@@ -110,7 +113,15 @@ public class PlayWorkout extends AppCompatActivity {
                     public void onTick(long millisUntilFinished) {
                         seekBar.setVisibility(View.VISIBLE);
                         seekBar.setMax((int) Float.parseFloat(cell5.toString()));
+                        if((finalSeconds>=10)&&(k2>=10)){
                         repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                        }else if((finalSeconds<10)&&(k2>=10)){
+                            repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
+                        }else if((finalSeconds<10)&&(k2<10)){
+                            repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
+                        }else{
+                            repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                        }
                         seekBar.setProgress(k3);
                         k2++;
                         k3++;
@@ -123,7 +134,15 @@ public class PlayWorkout extends AppCompatActivity {
 
                     public void onFinish() {
                         seekBar.setProgress(k3);
-                        repcount.setText(k1+":"+k2+"                                                                 "+ finalMinute + ":"+ finalSeconds);
+                        if((finalSeconds>=10)&&(k2>=10)){
+                            repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                        }else if((finalSeconds<10)&&(k2>=10)){
+                            repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
+                        }else if((finalSeconds<10)&&(k2<10)){
+                            repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
+                        }else{
+                            repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                        }
                         btnPlay.setClickable(true);
                     }
                 }.start();
@@ -138,7 +157,7 @@ public class PlayWorkout extends AppCompatActivity {
                 TextView workoutName = (TextView) findViewById(R.id.workoutName);
             workoutName.setText(cell2.toString());
 
-
+            k=1;
             TextView workoutInfo = (TextView) findViewById(R.id.workoutinfo);
             workoutInfo.setText(cell3.toString());
 
@@ -178,15 +197,23 @@ public class PlayWorkout extends AppCompatActivity {
                         else if (j+2 > Integer.parseInt(cell4.toString())) {
                             j = 0;
                             i++;
+
                         } else {
                             j++;
                         }
-                        Log.d("aaab", String.valueOf(j)+" "+cell4.toString()+" "+cell2.toString()+" "+String.valueOf(i));
-
+                            if(k <= Integer.parseInt(cell4.toString())) {
+                                k++;
+                            }else{
+                                k=1;
+                            }
+                            Log.d("aaab", String.valueOf(j)+" "+cell4.toString()+" "+cell2.toString()+" "+String.valueOf(i));
+                            final TextView periodcount = (TextView) findViewById(R.id.periodcount);
+                            periodcount.setText("Period No: "+String.valueOf(k));
                          if(cell2.toString().equals("Rest")){
                              Intent intent = new Intent(getBaseContext(), Rest.class);
                              intent.putExtra("RESTTIME", cell5.toString());
                              startActivity(intent);
+                             k=0;
                              j=0;
                             }else{
 
@@ -209,7 +236,15 @@ public class PlayWorkout extends AppCompatActivity {
                                     public void onTick(long millisUntilFinished) {
                                         seekBar.setVisibility(View.VISIBLE);
                                         seekBar.setMax((int) Float.parseFloat(cell5.toString()));
-                                        repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                                        if((finalSeconds>=10)&&(k2>=10)){
+                                            repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                                        }else if((finalSeconds<10)&&(k2>=10)){
+                                            repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
+                                        }else if((finalSeconds<10)&&(k2<10)){
+                                            repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
+                                        }else{
+                                            repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                                        }
                                         seekBar.setProgress(k3);
                                         k2++;
                                         k3++;
@@ -222,7 +257,15 @@ public class PlayWorkout extends AppCompatActivity {
 
                                     public void onFinish() {
                                         seekBar.setProgress(k3);
-                                        repcount.setText(k1+":"+k2+"                                                                 "+ finalMinute + ":"+ finalSeconds);
+                                        if((finalSeconds>=10)&&(k2>=10)){
+                                            repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                                        }else if((finalSeconds<10)&&(k2>=10)){
+                                            repcount.setText(k1+":"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
+                                        }else if((finalSeconds<10)&&(k2<10)){
+                                            repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
+                                        }else{
+                                            repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                                        }
                                         btnPlay.setClickable(true);
                                     }
                                 }.start();

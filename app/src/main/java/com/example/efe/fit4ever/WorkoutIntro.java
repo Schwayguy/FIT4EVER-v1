@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
@@ -135,7 +136,7 @@ public class WorkoutIntro extends AppCompatActivity {
             Log.e("ERRORrate", e.getMessage());
         }
         try {
-            result = statement.executeQuery("select Title, Rate, Information, Subtitle, Name, Surname from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] AND" +
+            result = statement.executeQuery("select Title, Rate, Information, Subtitle, Username from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] AND" +
                     "[dbo].[Programs].[ID] = '" + progId + "'");
         } catch (SQLException e) {
             Log.e("ERRORc", e.getMessage());
@@ -144,7 +145,7 @@ public class WorkoutIntro extends AppCompatActivity {
             assert result != null;
             while (result.next()) {
                 progTitle.setText(result.getString("Title"));
-                progowner.setText("Author: "+result.getString("Name")+" "+result.getString("Surname"));
+                progowner.setText("Author: "+result.getString("Username"));
                 ratingtext.setText(result.getString("Rate"));
                 ratingBar.setRating(Float.parseFloat(result.getString("Rate")));
                 description.setText(result.getString("Information"));
@@ -160,9 +161,34 @@ public class WorkoutIntro extends AppCompatActivity {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+        String role = sharedPref.getString("role", "");
+        userId = sharedPref.getString("userId", "");
+        CheckBox idCheck=(CheckBox)findViewById(R.id.idBox);
+        CheckBox infoCheck=(CheckBox)findViewById(R.id.infoBox);
+        if (!role.equals("2")) {
+            try {
+                ResultSet tryWorkoutPurchase = statement.executeQuery("USE [Workout] SELECT * FROM [dbo].[UPRelation] where [UserID] ='" + userId + "' AND [ProgramId]='" + getIntent().getStringExtra("PROGID") + "'");
+                if (!tryWorkoutPurchase.next()) {
+                          idCheck.setVisibility(View.VISIBLE);
+                          infoCheck.setVisibility(View.VISIBLE);
+
+                      }else{
+                          Button purchaseBtn=(Button)findViewById(R.id.purchaseBtn);
+                          purchaseBtn.setText("Download");
+                          idCheck.setVisibility(View.INVISIBLE);
+                          infoCheck.setVisibility(View.INVISIBLE);
+                          idCheck.setClickable(false);
+                          infoCheck.setClickable(false);
+                      }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
 
         try {
-            SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
+            sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
             userId = sharedPref.getString("userId", "");
             LinearLayout layout = (LinearLayout) findViewById(R.id.commentslayout1);
             ResultSet tryWorkoutOwner = statement.executeQuery("USE [Workout] SELECT * FROM [dbo].[UPRelation] where [UserID] ='" + userId + "' AND [ProgramId]='" + getIntent().getStringExtra("PROGID") + "'");
@@ -224,7 +250,7 @@ public class WorkoutIntro extends AppCompatActivity {
 
                             String  uniqueID = UUID.randomUUID().toString();
                             statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[Comments] " +
-                                    "([ID],[Comment],[UserID],[WorkoutID],[LikeCount],[ProgramID],[IsActive],[CreateDate] )\n" +
+                                    "([ID],[Comment],[UserID],[WorkoutID],[LikeCount],[ProgramID],[IsActive],CAST(CreateDate AS DATE)as CreateDate )\n" +
                                     "   VALUES('"+uniqueID+"','"+usercomment.getText().toString()+"','"+userId+"',null,"+0+",'"+getIntent().getStringExtra("PROGID")+"',"+1+",'"+calendar.get(Calendar.YEAR) + "-" + String.valueOf(calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "')");
 
                             Toast.makeText(getApplicationContext(),"Comment sent.",Toast.LENGTH_SHORT).show();
@@ -245,7 +271,7 @@ public class WorkoutIntro extends AppCompatActivity {
                 Log.e("ERRORc", e.getMessage());
             }
         try {
-            result = statement.executeQuery("select [dbo].[Comments].[ID], [dbo].[Comments].[Comment], [dbo].[Comments].[UserID], [dbo].[Users].[Username], [dbo].[Comments].[LikeCount] ,[dbo].[Comments].[CreateDate]  " +
+            result = statement.executeQuery("select [dbo].[Comments].[ID], [dbo].[Comments].[Comment], [dbo].[Comments].[UserID], [dbo].[Users].[Username], [dbo].[Comments].[LikeCount] ,CAST([dbo].[Comments].[CreateDate] AS DATE)as CreateDate  " +
                     "from [dbo].[Comments] INNER JOIN [dbo].[Users] on  [dbo].[Comments].[IsActive]=1 and" +
                     "[dbo].[Comments].[ProgramID] = '"+progId+"' and [dbo].[Users].[ID]=[dbo].[Comments].[UserID] order by [dbo].[Comments].[CreateDate]");
         } catch (SQLException e) {
@@ -366,13 +392,25 @@ public class WorkoutIntro extends AppCompatActivity {
                 if (!role.equals("2")) {
                     ResultSet tryWorkoutPurchase = statement.executeQuery("USE [Workout] SELECT * FROM [dbo].[UPRelation] where [UserID] ='" + userId + "' AND [ProgramId]='" + getIntent().getStringExtra("PROGID") + "'");
                     if (!tryWorkoutPurchase.next()) {
-                        statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UPRelation] ([ID] ,[ProgramID],[UserID],[RegisterDate]) VALUES" +
-                                " ('" + uniqueID + "','" + getIntent().getStringExtra("PROGID") + "','" + userId + "','" + calendar.get(Calendar.YEAR) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "')");
-                        statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Programs] SET IsEditable=0 where ID='" + getIntent().getStringExtra("PROGID") + "')");
+                        int idP=0;
+                        int infoP=0;
+                        CheckBox idCheck=(CheckBox)findViewById(R.id.idBox);
+                        CheckBox infoCheck=(CheckBox)findViewById(R.id.infoBox);
+                        if(idCheck.isChecked()){
+                            idP=1;
+                        }
+                        if(infoCheck.isChecked()){
+                            infoP=1;
+                        }
+                        statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UPRelation] ([ID] ,[ProgramID],[UserID],[RegisterDate],InfoPermission,IDPermission) VALUES" +
+                                " ('" + uniqueID + "','" + getIntent().getStringExtra("PROGID") + "','" + userId + "','" + calendar.get(Calendar.YEAR) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "',"+infoP+","+idP+" )");
+                        statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Programs] SET IsEditable=0 where ID='"+getIntent().getStringExtra("PROGID")+"'");
+
+
+
                         Toast.makeText(this, "Program purchased.", Toast.LENGTH_SHORT).show();
 
-
-                        //MyWorkout'a gönder
+                        Download();
 
 
                     } else {
@@ -397,10 +435,6 @@ public class WorkoutIntro extends AppCompatActivity {
         String userId = sharedPref.getString("userId", "");
         File logFile = new File(getExternalFilesDir(null),getIntent().getStringExtra("PROGID") + ".xls");
 
-        // şuan her zaman yeni dosya indiriyo sonra düzelt
-        if(logFile.exists()){
-            Toast.makeText(this,"It already exists.",Toast.LENGTH_SHORT).show();
-        }else {
             try {
                 ResultSet workoutDownloadInfo = statement.executeQuery("USE [Workout] SELECT  WorkoutID , Name, Video, Information ,Rate, Title ,Subtitle , Period ,Repeat, Queue" +
                         " FROM [dbo].[Workouts] INNER JOIN [dbo].[PWRelation] on [dbo].[Workouts].[ID]=[dbo].[PWRelation].[WorkoutID] AND " +
@@ -513,7 +547,7 @@ public class WorkoutIntro extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+
     }
 
     public void AddToDevice(){
@@ -629,6 +663,7 @@ public class WorkoutIntro extends AppCompatActivity {
             os = new FileOutputStream(programsFile);
             myWorkBook.write(os);
             os.close();
+
 
         } catch (SQLException e) {
             e.printStackTrace();

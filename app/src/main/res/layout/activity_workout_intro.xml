@@ -97,11 +97,23 @@
                     android:id="@+id/progOwnerText"
                     android:layout_gravity="bottom|right" />
 
+                <CheckBox
+                    android:text="Permission to collect account info."
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/idBox" />
+
+                <CheckBox
+                    android:text="Permission to collect body info."
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/infoBox" />
+
                 <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="PURCHASE"
-                    android:id="@+id/button"
+                    android:id="@+id/purchaseBtn"
                     android:onClick="Purchase"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true" />

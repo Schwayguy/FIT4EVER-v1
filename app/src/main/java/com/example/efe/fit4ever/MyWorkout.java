@@ -25,6 +25,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -104,7 +105,8 @@ public class MyWorkout extends AppCompatActivity {
         TextView ratingtext = (TextView) findViewById(R.id.ratingText2);
         RatingBar ratingBar = (RatingBar) findViewById(R.id.ratingBar2);
         TextView description = (TextView) findViewById(R.id.description2);
-
+        TextView supText = (TextView) findViewById(R.id.supText);
+        supText.setVisibility(View.INVISIBLE);
 
         ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo inet = conMgr.getActiveNetworkInfo();
@@ -158,7 +160,7 @@ public class MyWorkout extends AppCompatActivity {
         if (inet != null) {
             ResultSet result = null;
             try {
-                result = statement.executeQuery("select IsDeleted,IsEditable,IsActive,Rate from Programs where" +
+                result = statement.executeQuery("select IsDeleted,Rate from Programs where" +
                         "[dbo].[Programs].[ID] = '" + progId + "'");
             } catch (SQLException e) {
                 Log.e("ERRORc", e.getMessage());
@@ -168,6 +170,10 @@ public class MyWorkout extends AppCompatActivity {
                 while (result.next()) {
                     ratingtext.setText(result.getString("Rate"));
                     ratingBar.setRating(Float.parseFloat(result.getString("Rate")));
+                    if(!result.getString("IsDeleted").equals("0")){
+                        supText.setText(Html.fromHtml("<font color=red>" +"This program is no loner supported."+ "</font>"));
+                        supText.setVisibility(View.VISIBLE);
+                    }
                     //aktiflik uyarısını burada yap
                 }
             } catch (SQLException e) {
@@ -297,8 +303,11 @@ public class MyWorkout extends AppCompatActivity {
                             if (Float.parseFloat(cell4.toString()) >= 60) {
                                 int minute = (int) (Float.parseFloat(cell4.toString()) / 60);
                                 int seconds = (int) (Float.parseFloat(cell4.toString()) % 60);
-
-                                canvas2.drawText(cell2.toString() + " for " +minute + ":" + seconds , (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                if(seconds>=10) {
+                                    canvas2.drawText(cell2.toString() + " for " + minute + ":" + seconds, (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                }else{
+                                    canvas2.drawText(cell2.toString() + " for " + minute + ":0" + seconds, (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                }
                             } else {
                                 canvas2.drawText(cell2.toString() + " for " +"00:" + String.valueOf((int)Float.parseFloat(cell4.toString()))  , (float) (newx * 0.55), (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
                             }
@@ -309,7 +318,11 @@ public class MyWorkout extends AppCompatActivity {
                                 if (Float.parseFloat(cell3.toString()) >= 60) {
                                     int minute = (int) (Float.parseFloat(cell3.toString()) / 60);
                                     int seconds = (int) (Float.parseFloat(cell3.toString()) % 60);
-                                    canvas2.drawText(minute + ":" + seconds , 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                    if(seconds>=10) {
+                                        canvas2.drawText(minute + ":" + seconds, 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                    }else{
+                                        canvas2.drawText(minute + ":0" + seconds, 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
+                                    }
                                 } else {
                                     canvas2.drawText("00:" + String.valueOf((int)Float.parseFloat(cell3.toString())) , 0, (float) (((newx * 0.575) + (newx * 0.685) * (j - 2))), paint);
                                 }

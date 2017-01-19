@@ -46,8 +46,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:id="@+id/periodcount"
+            android:layout_marginTop="20dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:id="@+id/repcount"
-            android:layout_marginTop="20dp" />
+            android:layout_marginTop="20dp"
+            android:textAppearance="@style/TextAppearance.AppCompat" />
 
         <SeekBar
             android:layout_width="match_parent"

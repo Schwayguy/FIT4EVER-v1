@@ -454,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
                          sheet1.setColumnWidth(5, (15 * 500));
                          sheet1.setColumnWidth(6, (15 * 500));
 
-                         ResultSet userHistoryInfo = statement.executeQuery("USE [Workout] SELECT WeightLoss,RecordDate, ProgramID,Title, FatRatio, MuscleRatio from [UserWeightChangeLog] INNER JOIN [Programs] on UserID='" + loginRes.getString("ID") + "'" +
+                         ResultSet userHistoryInfo = statement.executeQuery("USE [Workout] SELECT WeightLoss,CAST(RecordDate AS DATE)as RecordDate, ProgramID,Title, FatRatio, MuscleRatio from [UserWeightChangeLog] INNER JOIN [Programs] on UserID='" + loginRes.getString("ID") + "'" +
                                  "and [dbo].[Programs].[ID]=[dbo].[UserWeightChangeLog].[ProgramID] ");
                          int row = 1;
                          while (userHistoryInfo.next()) {
@@ -593,7 +593,7 @@ public class MainActivity extends AppCompatActivity {
                  }
                  finish();
                  startActivity(getIntent());
-                 //   displayData(view);
+                    displayData(view);
              }
 
          } catch (SQLException e) {
