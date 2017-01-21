@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,6 +29,16 @@ public class Rest extends AppCompatActivity {
                 resttext.setText(String.valueOf((int) (millisUntilFinished / 1000)));
             }
             public void onFinish() {
+                MediaPlayer m = new MediaPlayer();
+                try{
+                    AssetFileDescriptor descriptor = Rest.this.getAssets().openFd("bell.wav");
+                    m.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength() );
+                    descriptor.close();
+                    m.prepare();
+                    m.start();
+                } catch(Exception e){
+                    // handle error here..
+                }
                 Toast.makeText(getApplicationContext(), "Continue workout", Toast.LENGTH_SHORT).show();
                 finish();
             }

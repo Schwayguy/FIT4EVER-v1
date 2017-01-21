@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.CountDownTimer;
@@ -92,7 +93,7 @@ public class PlayWorkout extends AppCompatActivity {
                 j = 0;
             }
             final TextView periodcount = (TextView) findViewById(R.id.periodcount);
-            periodcount.setText("Period No: "+String.valueOf(1));
+            periodcount.setText("Period No: "+String.valueOf(1) +" / "+cell4.toString());
             int minute =0;
             int seconds=0;
             if(Float.parseFloat(cell5.toString()) >= 30) {
@@ -142,6 +143,17 @@ public class PlayWorkout extends AppCompatActivity {
                             repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":0"+ finalSeconds);
                         }else{
                             repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
+                        }
+
+                        MediaPlayer m = new MediaPlayer();
+                        try{
+                            AssetFileDescriptor descriptor = PlayWorkout.this.getAssets().openFd("bell.wav");
+                            m.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength() );
+                            descriptor.close();
+                            m.prepare();
+                            m.start();
+                        } catch(Exception e){
+                            // handle error here..
                         }
                         btnPlay.setClickable(true);
                     }
@@ -208,7 +220,7 @@ public class PlayWorkout extends AppCompatActivity {
                             }
                             Log.d("aaab", String.valueOf(j)+" "+cell4.toString()+" "+cell2.toString()+" "+String.valueOf(i));
                             final TextView periodcount = (TextView) findViewById(R.id.periodcount);
-                            periodcount.setText("Period No: "+String.valueOf(k));
+                            periodcount.setText("Period No: "+String.valueOf(k) +" / "+cell4.toString());
                          if(cell2.toString().equals("Rest")){
                              Intent intent = new Intent(getBaseContext(), Rest.class);
                              intent.putExtra("RESTTIME", cell5.toString());
@@ -266,6 +278,16 @@ public class PlayWorkout extends AppCompatActivity {
                                         }else{
                                             repcount.setText(k1+":0"+k2+"                                                                "+ finalMinute + ":"+ finalSeconds);
                                         }
+                                        MediaPlayer m = new MediaPlayer();
+                                        try{
+                                            AssetFileDescriptor descriptor = PlayWorkout.this.getAssets().openFd("bell.wav");
+                                            m.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength() );
+                                            descriptor.close();
+                                            m.prepare();
+                                            m.start();
+                                        } catch(Exception e){
+                                            // handle error here..
+                                        }
                                         btnPlay.setClickable(true);
                                     }
                                 }.start();
@@ -303,6 +325,16 @@ public class PlayWorkout extends AppCompatActivity {
                                          seekBar.setProgress(k3);
                                          repcount.setText(k1+":"+k2+"                                                                 "+ finalMinute + ":"+ finalSeconds);
                                          btnPlay.setClickable(true);
+                                         MediaPlayer m = new MediaPlayer();
+                                         try{
+                                             AssetFileDescriptor descriptor = PlayWorkout.this.getAssets().openFd("bell.wav");
+                                             m.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength() );
+                                             descriptor.close();
+                                             m.prepare();
+                                             m.start();
+                                         } catch(Exception e){
+                                             // handle error here..
+                                         }
                                      }
                                  }.start();
 

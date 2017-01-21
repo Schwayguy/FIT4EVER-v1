@@ -88,32 +88,36 @@ public class WorkoutHistory extends AppCompatActivity {
                         Cell cell5 = row.getCell(fatRef.getCol());
                         Cell cell6 = row.getCell(muscleRef.getCol());
 
-                        if (!cell3.toString().isEmpty()) {
+
                             TextView userweightinfo = new TextView(this);
                             userweightinfo.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-                            String progname = cell4.toString();
-                            String date = cell2.toString();
-                            String weightloss = cell1.toString();
-                            String fatratio = cell5.toString();
-                            String muscleratio = cell6.toString();
-                            String height = sharedPref.getString("height", "");
-                            float bmi = 0;
-                            if (!height.isEmpty()) {
-                                bmi = Float.parseFloat(weightloss) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
-                            }
-
-                            userweightinfo.setText("| " + progname + " | " + date + " | " + weightloss + " | " + bmi + " | " + fatratio + " | " + muscleratio + " | ");
-                            userweightinfo.setGravity(Gravity.LEFT);
-                            userweightinfo.setPadding(0, 5, 0, 0);
-                            layout.addView(userweightinfo);
-                            view2 = new View(this);
-                            view2.setBackgroundColor(0xFFC2BEBF);
-                            layout.addView(view2, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+                        String progname="No Program";
+                        if (!cell3.toString().isEmpty()) {
+                            progname = cell4.toString();
                         }
+                        String date = cell2.toString();
+                        String weightloss = cell1.toString();
+                        String fatratio = cell5.toString();
+                        String muscleratio = cell6.toString();
+                        String height = sharedPref.getString("height", "");
+                        float bmi = 0;
+                        if (!height.isEmpty()) {
+                            bmi = Float.parseFloat(weightloss) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
+                        }
+
+                        userweightinfo.setText("| " + progname + " | " + date + " | " + weightloss + " | " + bmi + " | " + fatratio + " | " + muscleratio + " | ");
+                        userweightinfo.setGravity(Gravity.LEFT);
+                        userweightinfo.setPadding(0, 5, 0, 0);
+                        layout.addView(userweightinfo);
+                        view2 = new View(this);
+                        view2.setBackgroundColor(0xFFC2BEBF);
+                        layout.addView(view2, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+
                     }
 
 
                     int j;
+
                     for (i = 3; i <= rowNumber; i++) {
 
 
@@ -139,70 +143,62 @@ public class WorkoutHistory extends AppCompatActivity {
                             CellReference weightRefBefore = new CellReference("A" + j);
                             CellReference fatRefBefore = new CellReference("B" + j);
                             CellReference muscleRefBefore = new CellReference("C" + j);
-                            CellReference progBefore = new CellReference("E" + j);
                             Row rowBefore = mySheet.getRow(weightRefBefore.getRow());
                             Cell cellw0 = rowBefore.getCell(weightRefBefore.getCol());
                             Cell cellf0 = rowBefore.getCell(fatRefBefore.getCol());
                             Cell cellm0 = rowBefore.getCell(muscleRefBefore.getCol());
-                            Cell cellp0 = rowBefore.getCell(progBefore.getCol());
-                            while (cellp0.toString().isEmpty()) {
-                                j--;
-                                weightRefBefore = new CellReference("A" + j);
-                                rowBefore = mySheet.getRow(weightRefBefore.getRow());
-                                cellp0 = rowBefore.getCell(progBefore.getCol());
-                                cellw0 = rowBefore.getCell(weightRefBefore.getCol());
-                                cellf0 = rowBefore.getCell(fatRefBefore.getCol());
-                                cellm0 = rowBefore.getCell(muscleRefBefore.getCol());
-                            }
 
+                            TextView userweightinfo = new TextView(this);
+                            userweightinfo.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
 
+                            String progname="No Program";
                             if (!cell3.toString().isEmpty()) {
-                                TextView userweightinfo = new TextView(this);
-                                userweightinfo.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-
-                                String progname = cell4.toString();
-                                String date = cell2.toString();
-                                String weightloss = cell1.toString();
-                                String fatratio = cell5.toString();
-                                String muscleratio = cell6.toString();
-                                float delta = abs(Float.parseFloat(cellw0.toString()) - Float.parseFloat(cell1.toString()));
-                                String height = sharedPref.getString("height", "");
-                                float bmi = 0;
-                                if (!height.isEmpty()) {
-                                    bmi = Float.parseFloat(weightloss) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
-                                }
-                                Log.d("weights", cellw0.toString() + " " + cell1.toString() + " " + cellf0.toString() + " " + cell5.toString() + " " + cellm0.toString() + " " + cell6.toString());
-                                if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) < Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) < Float.parseFloat(cell6.toString())) && (delta >= 2)) {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=red>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
-                                } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) < Float.parseFloat(cell6.toString())) && (delta >= 2)) {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
-                                } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) < Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) > Float.parseFloat(cell6.toString())) && (delta >= 2)) {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=red>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=red>" + fatratio + "</font>" + " | " + "<font color=red>" + muscleratio + "</font>" + " | "));
-                                } else if ((Float.parseFloat(cellw0.toString()) > Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) > Float.parseFloat(cell6.toString())) && (delta >= 2)) {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=red>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=red>" + muscleratio + "</font>" + " | "));
-                                } else if ((Float.parseFloat(cellw0.toString()) > Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) < Float.parseFloat(cell6.toString())) && (delta >= 2)) {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
-                                } else if ((Float.parseFloat(cellw0.toString()) > Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) < Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) > Float.parseFloat(cell6.toString())) && (delta >= 2)) {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=red>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=red>" + fatratio + "</font>" + " | " + "<font color=red>" + muscleratio + "</font>" + " | "));
-                                } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) < Float.parseFloat(cell6.toString())) && (delta >= 2)) {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
-                                } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) < Float.parseFloat(cell6.toString())) && (delta >= 2)) {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
-                                } else {
-                                    userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + weightloss + " | " + bmi + " | " + fatratio + " | " + muscleratio + " | "));
-                                }
-                                userweightinfo.setGravity(Gravity.LEFT);
-                                userweightinfo.setPadding(0, 5, 0, 0);
-                                layout.addView(userweightinfo);
-                                view2 = new View(this);
-                                view2.setBackgroundColor(0xFFC2BEBF);
-                                layout.addView(view2, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
-
-
+                                progname = cell4.toString();
                             }
+                            String date = cell2.toString();
+                            String weightloss = cell1.toString();
+                            String fatratio = cell5.toString();
+                            String muscleratio = cell6.toString();
+                            float delta = abs(Float.parseFloat(cellw0.toString()) - Float.parseFloat(cell1.toString()));
+                            String height = sharedPref.getString("height", "");
+                            float bmi = 0;
+                            if (!height.isEmpty()) {
+                                bmi = Float.parseFloat(weightloss) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
+                            }
+                            Log.d("weights", cellw0.toString() + " " + cell1.toString() + " " + cellf0.toString() + " " + cell5.toString() + " " + cellm0.toString() + " " + cell6.toString());
+                            if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) <= Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) < Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=red>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
+                            } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) <= Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
+                            } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) <= Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) > Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=red>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=red>" + fatratio + "</font>" + " | " + "<font color=red>" + muscleratio + "</font>" + " | "));
+                            } else if ((Float.parseFloat(cellw0.toString()) > Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) > Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=red>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=red>" + muscleratio + "</font>" + " | "));
+                            } else if ((Float.parseFloat(cellw0.toString()) > Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) <= Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
+                            } else if ((Float.parseFloat(cellw0.toString()) > Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) <= Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) >= Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=red>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=red>" + fatratio + "</font>" + " | " + "<font color=red>" + muscleratio + "</font>" + " | "));
+                            } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) <= Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
+                            } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) > Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) <= Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=green>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
+                            }else if ((Float.parseFloat(cellw0.toString()) > Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) <= Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) < Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=green>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=red>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
+                            } else if ((Float.parseFloat(cellw0.toString()) < Float.parseFloat(cell1.toString())) && (Float.parseFloat(cellf0.toString()) <= Float.parseFloat(cell5.toString())) && (Float.parseFloat(cellm0.toString()) <= Float.parseFloat(cell6.toString())) && (delta >= 2)) {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + "<font color=red>" + weightloss + "</font>" + " | " + bmi + " | " + "<font color=red>" + fatratio + "</font>" + " | " + "<font color=green>" + muscleratio + "</font>" + " | "));
+                            }else {
+                                userweightinfo.setText(Html.fromHtml("| " + progname + " | " + date + " | " + weightloss + " | " + bmi + " | " + fatratio + " | " + muscleratio + " | "));
+                            }
+                            userweightinfo.setGravity(Gravity.LEFT);
+                            userweightinfo.setPadding(0, 5, 0, 0);
+                            layout.addView(userweightinfo);
+                            view2 = new View(this);
+                            view2.setBackgroundColor(0xFFC2BEBF);
+                            layout.addView(view2, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
                         }
                     }
                 }
+
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {

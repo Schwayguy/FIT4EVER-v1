@@ -185,6 +185,13 @@ public class WorkoutIntro extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+        }else{
+            Button purchaseBtn=(Button)findViewById(R.id.purchaseBtn);
+            purchaseBtn.setText("Download");
+            idCheck.setVisibility(View.INVISIBLE);
+            infoCheck.setVisibility(View.INVISIBLE);
+            idCheck.setClickable(false);
+            infoCheck.setClickable(false);
         }
 
         try {
@@ -250,7 +257,7 @@ public class WorkoutIntro extends AppCompatActivity {
 
                             String  uniqueID = UUID.randomUUID().toString();
                             statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[Comments] " +
-                                    "([ID],[Comment],[UserID],[WorkoutID],[LikeCount],[ProgramID],[IsActive],CAST(CreateDate AS DATE)as CreateDate )\n" +
+                                    "([ID],[Comment],[UserID],[WorkoutID],[LikeCount],[ProgramID],[IsActive],[CreateDate] )\n" +
                                     "   VALUES('"+uniqueID+"','"+usercomment.getText().toString()+"','"+userId+"',null,"+0+",'"+getIntent().getStringExtra("PROGID")+"',"+1+",'"+calendar.get(Calendar.YEAR) + "-" + String.valueOf(calendar.get(Calendar.MONTH)+1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "')");
 
                             Toast.makeText(getApplicationContext(),"Comment sent.",Toast.LENGTH_SHORT).show();
@@ -405,9 +412,6 @@ public class WorkoutIntro extends AppCompatActivity {
                         statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UPRelation] ([ID] ,[ProgramID],[UserID],[RegisterDate],InfoPermission,IDPermission) VALUES" +
                                 " ('" + uniqueID + "','" + getIntent().getStringExtra("PROGID") + "','" + userId + "','" + calendar.get(Calendar.YEAR) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DAY_OF_MONTH) + "',"+infoP+","+idP+" )");
                         statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Programs] SET IsEditable=0 where ID='"+getIntent().getStringExtra("PROGID")+"'");
-
-
-
                         Toast.makeText(this, "Program purchased.", Toast.LENGTH_SHORT).show();
 
                         Download();
@@ -416,8 +420,9 @@ public class WorkoutIntro extends AppCompatActivity {
                     } else {
                         Toast.makeText(this, "You already own this workout.", Toast.LENGTH_SHORT).show();
                     }
+                }else{
+                    Download();
                 }
-                Download();
             } catch (SQLException e) {
                 Log.e("ERRORp", e.getMessage());
             }
@@ -434,8 +439,7 @@ public class WorkoutIntro extends AppCompatActivity {
         SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String userId = sharedPref.getString("userId", "");
         File logFile = new File(getExternalFilesDir(null),getIntent().getStringExtra("PROGID") + ".xls");
-
-            try {
+        try {
                 ResultSet workoutDownloadInfo = statement.executeQuery("USE [Workout] SELECT  WorkoutID , Name, Video, Information ,Rate, Title ,Subtitle , Period ,Repeat, Queue" +
                         " FROM [dbo].[Workouts] INNER JOIN [dbo].[PWRelation] on [dbo].[Workouts].[ID]=[dbo].[PWRelation].[WorkoutID] AND " +
                         "[dbo].[PWRelation].[IsActive]=1 AND[ProgramID]='" + getIntent().getStringExtra("PROGID") + "' order by Queue");
@@ -504,6 +508,7 @@ public class WorkoutIntro extends AppCompatActivity {
 
                 FileOutputStream os = null;
                 int row = 1;
+
                 while (workoutDownloadInfo.next()) {
                     Row dataRow = sheet1.createRow(row);
 

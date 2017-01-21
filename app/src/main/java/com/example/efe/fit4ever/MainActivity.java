@@ -1,12 +1,14 @@
 package com.example.efe.fit4ever;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -402,9 +404,13 @@ public class MainActivity extends AppCompatActivity {
 
                  String role = sharedPref.getString("role", "");
                  if (!role.equals("2")) {
-
                      File weightFile = new File(getExternalFilesDir(null).getAbsolutePath(), loginRes.getString("ID") + ".xls");
                      File usersFile = new File(getExternalFilesDir(null).getAbsolutePath(), "users.xls");
+                    /* weightFile.getCanonicalFile().delete();
+                     if(weightFile.exists()){
+                         getApplicationContext().deleteFile(weightFile.getName());
+                     }*/
+
                      if (!weightFile.exists()) {
                          Workbook wb = new HSSFWorkbook();
                          Cell c = null;
@@ -454,8 +460,7 @@ public class MainActivity extends AppCompatActivity {
                          sheet1.setColumnWidth(5, (15 * 500));
                          sheet1.setColumnWidth(6, (15 * 500));
 
-                         ResultSet userHistoryInfo = statement.executeQuery("USE [Workout] SELECT WeightLoss,CAST(RecordDate AS DATE)as RecordDate, ProgramID,Title, FatRatio, MuscleRatio from [UserWeightChangeLog] INNER JOIN [Programs] on UserID='" + loginRes.getString("ID") + "'" +
-                                 "and [dbo].[Programs].[ID]=[dbo].[UserWeightChangeLog].[ProgramID] ");
+                         ResultSet userHistoryInfo = statement.executeQuery("USE [Workout] SELECT CAST(WeightLoss as int)as WeightLoss,CAST(RecordDate AS DATE)as RecordDate, ProgramID, CAST(FatRatio as int)as FatRatio, CAST(MuscleRatio as int)as MuscleRatio from [UserWeightChangeLog] where UserID='" + loginRes.getString("ID") + "' order by RecordDate");
                          int row = 1;
                          while (userHistoryInfo.next()) {
                              Row dataRow = sheet1.createRow(row);
@@ -469,9 +474,13 @@ public class MainActivity extends AppCompatActivity {
                              c = dataRow.createCell(3);
                              c.setCellValue(userHistoryInfo.getString("RecordDate"));
                              c = dataRow.createCell(4);
-                             c.setCellValue(userHistoryInfo.getString("ProgramID"));
+                             if(userHistoryInfo.getString("ProgramID").equals("00000000-0000-0000-0000-00000000000")){
+                                 c.setCellValue("");
+                             }else {
+                                 c.setCellValue(userHistoryInfo.getString("ProgramID"));
+                             }
                              c = dataRow.createCell(5);
-                             c.setCellValue(userHistoryInfo.getString("Title"));
+                             c.setCellValue("No Program");
                              c = dataRow.createCell(6);
                              c.setCellValue(1);
                              row++;
@@ -479,6 +488,31 @@ public class MainActivity extends AppCompatActivity {
                          FileOutputStream os = null;
                          os = new FileOutputStream(weightFile);
                          wb.write(os);
+
+                         FileInputStream myInput = null;
+                         myInput = new FileInputStream(weightFile);
+                         POIFSFileSystem myFileSystem = null;
+                         myFileSystem = new POIFSFileSystem(myInput);
+                         HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                         final HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                         final int rowNumber = mySheet.getPhysicalNumberOfRows();
+                         int i ;
+                         for(i=2;i<=rowNumber;i++) {
+                             CellReference idRef = new CellReference("E" + i);
+                             Row row1 = mySheet.getRow(idRef.getRow());
+                             Cell cell1 = row1.getCell(idRef.getCol());
+                             if ((!cell1.toString().equals("00000000-0000-0000-0000-00000000000"))) {
+                                 CellReference titleRef = new CellReference("F" + i);
+                                 ResultSet progTitleInfo = statement.executeQuery("USE [Workout] SELECT Title from Programs where ID = '"+cell1.toString()+"'");
+                                 while (progTitleInfo.next()){
+                                 Cell cell2 = row1.getCell(titleRef.getCol());
+                                 cell2.setCellValue(progTitleInfo.getString("Title"));
+                                 os = new FileOutputStream(weightFile);
+                                 myWorkBook.write(os);
+                                 }
+                             }
+                         }
+
 
                      }
                      if (!usersFile.exists()) {
@@ -596,11 +630,11 @@ public class MainActivity extends AppCompatActivity {
                     displayData(view);
              }
 
-         } catch (SQLException e) {
-             Log.e("ERROR", e.getMessage());
-         } catch (FileNotFoundException e) {
+         }catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }else{
@@ -723,7 +757,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                    statement.executeUpdate("update Users set Weight=" + wT + " where ID ='" + sharedPref.getString("userId", "") + "'");
+                    statement.executeUpdate("update Users set Weight=" + wT + " where ID ='" + sharedPref.getString("userId", "") + "'");//HEİGHT DEĞİŞTİRİRKEN BURAYA DA BAK
                 }
                 File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
                 if (weightFile.exists()) {
@@ -832,15 +866,18 @@ public class MainActivity extends AppCompatActivity {
                             Cell cell3 = row.getCell(muscleRef.getCol());
                             Cell cell4 = row.getCell(recordRef.getCol());
                             Cell cell5 = row.getCell(progidRef.getCol());
-                            if (!cell5.toString().isEmpty()) {
-                                String uniqueID = UUID.randomUUID().toString();
-                                Statement statement3 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                                statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio])" +
-                                        "VALUES('"+ uniqueID +"','"+ sharedPref.getString("userId", "")+"',"+ cell1.toString() + ",'" + cell4.toString() + "','" + cell5.toString() + "'," + cell2.toString() + "," + cell3.toString() + ")");
-
-                                cell.setCellValue(1);
-                                Log.d("weight",cell1.toString());
+                            String progid="00000000-0000-0000-0000-000000000000";
+                            if(!cell5.toString().isEmpty()){
+                                progid=cell5.toString();
                             }
+                            String uniqueID = UUID.randomUUID().toString();
+                            Statement statement3 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                            statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio])" +
+                                    "VALUES('"+ uniqueID +"','"+ sharedPref.getString("userId", "")+"',"+ cell1.toString() + ",'" + cell4.toString() + "','" + progid + "'," + cell2.toString() + "," + cell3.toString() + ")");
+
+                            cell.setCellValue(1);
+                            Log.d("weight",cell1.toString());
+
                         }
                         FileOutputStream os = null;
                         os = new FileOutputStream(weightFile);
@@ -938,6 +975,32 @@ public class MainActivity extends AppCompatActivity {
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
+    }
+
+    @Override
+
+    public void onBackPressed() {
+        AlertDialog.Builder alertDlg = new AlertDialog.Builder(this);
+        alertDlg.setMessage("Are you sure you want to exit?");
+        alertDlg.setCancelable(false);
+        alertDlg.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        MainActivity.super.onBackPressed();
+                    }
+                }
+        );
+        alertDlg.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+            @Override
+
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+
+        });
+
+        alertDlg.create().show();
+
     }
 }
 
