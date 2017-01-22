@@ -2,12 +2,14 @@ package com.example.efe.fit4ever;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.CountDownTimer;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -153,7 +155,7 @@ public class PlayWorkout extends AppCompatActivity {
                             m.prepare();
                             m.start();
                         } catch(Exception e){
-                            // handle error here..
+                            e.printStackTrace();
                         }
                         btnPlay.setClickable(true);
                     }
@@ -213,10 +215,10 @@ public class PlayWorkout extends AppCompatActivity {
                         } else {
                             j++;
                         }
-                            if(k <= Integer.parseInt(cell4.toString())) {
-                                k++;
+                            if((k < Integer.parseInt(cell4.toString())&&(j!=0))){
+                                k=j;
                             }else{
-                                k=1;
+                                k=Integer.parseInt(cell4.toString());
                             }
                             Log.d("aaab", String.valueOf(j)+" "+cell4.toString()+" "+cell2.toString()+" "+String.valueOf(i));
                             final TextView periodcount = (TextView) findViewById(R.id.periodcount);
@@ -286,7 +288,7 @@ public class PlayWorkout extends AppCompatActivity {
                                             m.prepare();
                                             m.start();
                                         } catch(Exception e){
-                                            // handle error here..
+                                            e.printStackTrace();
                                         }
                                         btnPlay.setClickable(true);
                                     }
@@ -333,7 +335,7 @@ public class PlayWorkout extends AppCompatActivity {
                                              m.prepare();
                                              m.start();
                                          } catch(Exception e){
-                                             // handle error here..
+                                             e.printStackTrace();
                                          }
                                      }
                                  }.start();
@@ -417,5 +419,31 @@ public class PlayWorkout extends AppCompatActivity {
         client.disconnect();
     }
 
+    @Override
+
+    public void onBackPressed() {
+        AlertDialog.Builder alertDlg = new AlertDialog.Builder(this);
+        alertDlg.setMessage("Are you sure you want to exit?");
+        alertDlg.setCancelable(false);
+        alertDlg.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        PlayWorkout.super.onBackPressed();
+                        finish();
+                    }
+                }
+        );
+        alertDlg.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+            @Override
+
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+
+        });
+
+        alertDlg.create().show();
+
+    }
 
 }

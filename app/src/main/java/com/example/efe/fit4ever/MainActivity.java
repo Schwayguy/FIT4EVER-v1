@@ -406,10 +406,8 @@ public class MainActivity extends AppCompatActivity {
                  if (!role.equals("2")) {
                      File weightFile = new File(getExternalFilesDir(null).getAbsolutePath(), loginRes.getString("ID") + ".xls");
                      File usersFile = new File(getExternalFilesDir(null).getAbsolutePath(), "users.xls");
-                    /* weightFile.getCanonicalFile().delete();
-                     if(weightFile.exists()){
-                         getApplicationContext().deleteFile(weightFile.getName());
-                     }*/
+                    weightFile.getCanonicalFile().delete();
+
 
                      if (!weightFile.exists()) {
                          Workbook wb = new HSSFWorkbook();
@@ -563,15 +561,15 @@ public class MainActivity extends AppCompatActivity {
                          c = dataRow.createCell(1);
                          c.setCellValue(passbuffer.toString());
                          c = dataRow.createCell(2);
-                         c.setCellValue(loginRes.getString("ID"));
+                         c.setCellValue(sharedPref.getString("userId", ""));
                          c = dataRow.createCell(3);
-                         c.setCellValue(loginRes.getString("Username"));
+                         c.setCellValue(sharedPref.getString("username", ""));
                          c = dataRow.createCell(4);
-                         c.setCellValue(loginRes.getString("Weight"));
+                         c.setCellValue(sharedPref.getString("weight", ""));
                          c = dataRow.createCell(5);
-                         c.setCellValue(loginRes.getString("Height"));
+                         c.setCellValue(sharedPref.getString("height", ""));
                          c = dataRow.createCell(6);
-                         c.setCellValue(loginRes.getString("Role"));
+                         c.setCellValue(sharedPref.getString("role", ""));
                          FileOutputStream os = null;
                          os = new FileOutputStream(usersFile);
                          wb.write(os);
@@ -587,16 +585,16 @@ public class MainActivity extends AppCompatActivity {
                          CellReference idRef = new CellReference("C" + i);
                          Row row = mySheet.getRow(idRef.getRow());
                          Cell cell1 = row.getCell(idRef.getCol());
-                         while ((!cell1.toString().equals(loginRes.getString("ID"))) && (i < rowNumber)) {
+                         while ((!cell1.toString().equals(sharedPref.getString("userId", ""))) && (i < rowNumber)) {
                              i++;
                              idRef = new CellReference("C" + i);
                              row = mySheet.getRow(idRef.getRow());
                              cell1 = row.getCell(idRef.getCol());
                          }
-                         if (cell1.toString().equals(loginRes.getString("ID"))) {
+                         if (cell1.toString().equals(sharedPref.getString("userId", ""))) {
                              CellReference weightRef = new CellReference("E" + i);
                              Cell cell2 = row.getCell(weightRef.getCol());
-                             cell2.setCellValue(loginRes.getString("Weight"));
+                             cell2.setCellValue(sharedPref.getString("weight", ""));
                              FileOutputStream os = null;
                              os = new FileOutputStream(usersFile);
                              myWorkBook.write(os);
@@ -610,15 +608,15 @@ public class MainActivity extends AppCompatActivity {
                              c = dataRow.createCell(1);
                              c.setCellValue(passbuffer.toString());
                              c = dataRow.createCell(2);
-                             c.setCellValue(loginRes.getString("ID"));
+                             c.setCellValue(sharedPref.getString("userId", ""));
                              c = dataRow.createCell(3);
-                             c.setCellValue(loginRes.getString("Username"));
+                             c.setCellValue(sharedPref.getString("username", ""));
                              c = dataRow.createCell(4);
-                             c.setCellValue(loginRes.getString("Weight"));
+                             c.setCellValue(sharedPref.getString("weight", ""));
                              c = dataRow.createCell(5);
-                             c.setCellValue(loginRes.getString("Height"));
+                             c.setCellValue(sharedPref.getString("height", ""));
                              c = dataRow.createCell(6);
-                             c.setCellValue(loginRes.getString("Role"));
+                             c.setCellValue(sharedPref.getString("role", ""));
                              os = new FileOutputStream(usersFile);
                              myWorkBook.write(os);
                              os.close();

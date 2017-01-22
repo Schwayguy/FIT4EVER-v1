@@ -418,13 +418,49 @@ public class WorkoutIntro extends AppCompatActivity {
 
 
                     } else {
-                        Toast.makeText(this, "You already own this workout.", Toast.LENGTH_SHORT).show();
+                        File logFile = new File(getExternalFilesDir(null),getIntent().getStringExtra("PROGID") + ".xls");
+                        if(!logFile.exists()){
+                            Download();
+                        }else{
+                            File programsFile = new File(getExternalFilesDir(null),"programs.xls");
+                            FileInputStream myInput = null;
+                            myInput = new FileInputStream(programsFile);
+                            POIFSFileSystem myFileSystem = null;
+                            myFileSystem = new POIFSFileSystem(myInput);
+                            HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                            HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                            int rowNumber = mySheet.getPhysicalNumberOfRows();
+                            int i = 2;
+                            CellReference idRef = new CellReference("A" + i);
+                            CellReference progRef = new CellReference("L" + i);
+                            Row row = mySheet.getRow(idRef.getRow());
+                            Cell cell1 = row.getCell(idRef.getCol());
+                            Cell cell2 = row.getCell(progRef.getCol());
+                            while ((!cell1.toString().equals(getIntent().getStringExtra("PROGID")))&&(!cell2.toString().equals(userId))&&(i<=rowNumber)) {
+                                i++;
+                                idRef = new CellReference("A" + i);
+                                progRef = new CellReference("L" + i);
+                                row = mySheet.getRow(idRef.getRow());
+                                cell1 = row.getCell(idRef.getCol());
+                                cell2 = row.getCell(progRef.getCol());
+                            }
+                            if(i==rowNumber){
+                                Download();
+                            }else{
+                                Toast.makeText(this, "This program already exists on your device.", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
                     }
                 }else{
                     Download();
                 }
             } catch (SQLException e) {
                 Log.e("ERRORp", e.getMessage());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }else{
             Toast.makeText(this, "You need to login to make purchases.", Toast.LENGTH_SHORT).show();

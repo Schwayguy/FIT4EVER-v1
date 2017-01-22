@@ -37,7 +37,7 @@ public class Rest extends AppCompatActivity {
                     m.prepare();
                     m.start();
                 } catch(Exception e){
-                    // handle error here..
+                    e.printStackTrace();
                 }
                 Toast.makeText(getApplicationContext(), "Continue workout", Toast.LENGTH_SHORT).show();
                 finish();
