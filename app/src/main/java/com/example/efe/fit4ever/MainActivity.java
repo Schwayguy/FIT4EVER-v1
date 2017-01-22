@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                         ResultSet.CONCUR_UPDATABLE);
+                Toast.makeText(this,"Starting in online mode.",Toast.LENGTH_SHORT).show();
             } catch (SQLException e) {
                 e.printStackTrace();            }
 
@@ -406,8 +407,50 @@ public class MainActivity extends AppCompatActivity {
                  if (!role.equals("2")) {
                      File weightFile = new File(getExternalFilesDir(null).getAbsolutePath(), loginRes.getString("ID") + ".xls");
                      File usersFile = new File(getExternalFilesDir(null).getAbsolutePath(), "users.xls");
-                    weightFile.getCanonicalFile().delete();
+                     if (weightFile.exists()) {
+                         FileInputStream  myInput = new FileInputStream(weightFile);
+                         POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
+                         HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                         HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                         int rowNumber = mySheet.getPhysicalNumberOfRows();
+                         int i;
+                         for (i = 2; i <= rowNumber; i++) {
+                             CellReference cellReference = new CellReference("G" + i);
+                             Row row = mySheet.getRow(cellReference.getRow());
+                             Cell cell = row.getCell(cellReference.getCol());
+                             if (cell.toString().equals("0.0")) {
+                                 CellReference weightRef = new CellReference("A" + i);
+                                 CellReference fatRef = new CellReference("B" + i);
+                                 CellReference muscleRef = new CellReference("C" + i);
+                                 CellReference recordRef = new CellReference("D" + i);
+                                 CellReference progidRef = new CellReference("E" + i);
 
+                                 Cell cell1 = row.getCell(weightRef.getCol());
+                                 Cell cell2 = row.getCell(fatRef.getCol());
+                                 Cell cell3 = row.getCell(muscleRef.getCol());
+                                 Cell cell4 = row.getCell(recordRef.getCol());
+                                 Cell cell5 = row.getCell(progidRef.getCol());
+                                 String progid = "00000000-0000-0000-0000-000000000000";
+                                 if (!cell5.toString().isEmpty()) {
+                                     progid = cell5.toString();
+                                 }
+                                 String uniqueID = UUID.randomUUID().toString();
+                                 Statement statement3 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                                 statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio])" +
+                                         "VALUES('" + uniqueID + "','" + sharedPref.getString("userId", "") + "'," + cell1.toString() + ",'" + cell4.toString() + "','" + progid + "'," + cell2.toString() + "," + cell3.toString() + ")");
+
+                                 cell.setCellValue(1);
+                                 Log.d("weight", cell1.toString());
+
+                             }
+                             FileOutputStream os = null;
+                             os = new FileOutputStream(weightFile);
+                             myWorkBook.write(os);
+                             os.close();
+                         }
+
+                         weightFile.getCanonicalFile().delete();
+                     }
 
                      if (!weightFile.exists()) {
                          Workbook wb = new HSSFWorkbook();
@@ -837,7 +880,6 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo inet = conMgr.getActiveNetworkInfo();
         if(inet!= null) {
-
             FileInputStream myInput = null;
             File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
             if (weightFile.exists()) {
