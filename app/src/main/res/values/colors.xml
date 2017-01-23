@@ -2,6 +2,6 @@
 <resources>
     <color name="colorPrimary">#5869c6</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="common_signin_btn_dark_text_default">#303F9F</color>
+    <color name="common_signin_btn_dark_text_default">#303f9f</color>
     <color name="colorAccent">#FF4081</color>
 </resources>

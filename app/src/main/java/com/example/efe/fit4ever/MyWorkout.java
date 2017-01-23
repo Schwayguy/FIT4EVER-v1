@@ -160,7 +160,7 @@ public class MyWorkout extends AppCompatActivity {
         if (inet != null) {
             ResultSet result = null;
             try {
-                result = statement.executeQuery("select IsDeleted,Rate from Programs where" +
+                result = statement.executeQuery("select IsDeleted,Rate,Creator from Programs where" +
                         "[dbo].[Programs].[ID] = '" + progId + "'");
             } catch (SQLException e) {
                 Log.e("ERRORc", e.getMessage());
@@ -174,7 +174,16 @@ public class MyWorkout extends AppCompatActivity {
                         supText.setText(Html.fromHtml("<font color=red>" +"This program is no loner supported."+ "</font>"));
                         supText.setVisibility(View.VISIBLE);
                     }
-                    //aktiflik uyarısını burada yap
+                    final String creatorId= result.getString("Creator");
+                    progowner.setClickable(true);
+                    progowner.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(getBaseContext(), TrainerProfile.class);
+                            intent.putExtra("CREATOR",creatorId );
+                            startActivity(intent);
+                        }
+                    });
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

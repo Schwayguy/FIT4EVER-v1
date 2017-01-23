@@ -32,6 +32,7 @@ import android.text.format.Time;
 import android.os.StrictMode;
 import android.util.Log;
 
+import org.apache.poi.hssf.record.formula.functions.T;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -130,13 +131,14 @@ public class WorkoutIntro extends AppCompatActivity {
                     addition++;
                 }
                 progratevalue = ((one * 1) + (two * 2) + (three * 3) + (four * 4) + (five * 5)) / addition;
+                Toast.makeText(this,String.valueOf(progratevalue),Toast.LENGTH_SHORT).show();
             }
 
         } catch (SQLException e) {
             Log.e("ERRORrate", e.getMessage());
         }
         try {
-            result = statement.executeQuery("select Title, Rate, Information, Subtitle, Username from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] AND" +
+            result = statement.executeQuery("select Title, Rate, Information, Subtitle, Username, Creator from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] AND" +
                     "[dbo].[Programs].[ID] = '" + progId + "'");
         } catch (SQLException e) {
             Log.e("ERRORc", e.getMessage());
@@ -150,6 +152,17 @@ public class WorkoutIntro extends AppCompatActivity {
                 ratingBar.setRating(Float.parseFloat(result.getString("Rate")));
                 description.setText(result.getString("Information"));
                 subtitle.setText(result.getString("Subtitle"));
+
+                final String creatorId= result.getString("Creator");
+                progowner.setClickable(true);
+                progowner.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getBaseContext(), TrainerProfile.class);
+                        intent.putExtra("CREATOR",creatorId );
+                        startActivity(intent);
+                    }
+                });
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -157,7 +170,7 @@ public class WorkoutIntro extends AppCompatActivity {
 
         try {
             statement.executeUpdate(" USE [Workout] UPDATE [dbo].[Programs] SET [dbo].[Programs].[ViewCount]=[dbo].[Programs].[ViewCount]+1" +
-                    " , [dbo].[Programs].[Rate]= "+progratevalue+" WHERE [dbo].[Programs].[ID]='"+progId+"'");
+                    " , [dbo].[Programs].[Rate]= "+(int)progratevalue+" WHERE [dbo].[Programs].[ID]='"+progId+"'");
         } catch (SQLException e) {
             e.printStackTrace();
         }

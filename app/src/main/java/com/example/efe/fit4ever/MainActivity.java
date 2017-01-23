@@ -60,10 +60,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
+import static com.example.efe.fit4ever.R.id.heightText;
+
 
 public class MainActivity extends AppCompatActivity {
     int curWeight;
-    TextView bmiText;
     SharedPreferences sharedPref;
     Connection conn;
     Calendar calendar = Calendar.getInstance();
@@ -89,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
             try {
                 statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                         ResultSet.CONCUR_UPDATABLE);
-                Toast.makeText(this,"Starting in online mode.",Toast.LENGTH_SHORT).show();
             } catch (SQLException e) {
                 e.printStackTrace();            }
 
@@ -118,10 +118,11 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         String weight = sharedPref.getString("weight", "");
-
         String height = sharedPref.getString("height", "");
-        bmiText = (TextView) findViewById(R.id.bmitext);
-        if(!height.isEmpty()) {
+
+        if(!height.equals("")) {
+            TextView bmiText = (TextView) findViewById(R.id.bmitext);
+            Log.d("aaaasda",height+" "+weight);
             float bmi = Float.parseFloat(weight) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
             bmiText.setText("Your current BMI: " + bmi);
         }
@@ -129,8 +130,11 @@ public class MainActivity extends AppCompatActivity {
         EditText weightText = (EditText) findViewById(R.id.weightText);
         EditText fatText = (EditText) findViewById(R.id.fatText);
         EditText muscleText = (EditText) findViewById(R.id.muscleText);
+        EditText heightText = (EditText) findViewById(R.id.heightText);
         TextView username =(TextView) findViewById(R.id.usernameprofile);
         username.setText( sharedPref.getString("username", ""));
+
+
 
         String name = sharedPref.getString("email", "");
         String pass = sharedPref.getString("password", "");
@@ -331,16 +335,21 @@ public class MainActivity extends AppCompatActivity {
                     CellReference weightRef = new CellReference("A" + rowNumber);
                     CellReference fatRef = new CellReference("B" + rowNumber);
                     CellReference muscleRef = new CellReference("C" + rowNumber);
+                    CellReference heightRef = new CellReference("H" + rowNumber);
                     Row row =  mySheet.getRow(weightRef.getRow());
                     Cell cell1 = row.getCell(weightRef.getCol());
                     Cell cell2 = row.getCell(fatRef.getCol());
                     Cell cell3 = row.getCell(muscleRef.getCol());
-
+                    Cell cell4 = row.getCell(heightRef.getCol());
                     weightText.setHint(cell1.toString());
-
+                    heightText.setHint(cell4.toString());
                     fatText.setHint(cell2.toString());
-
                     muscleText.setHint(cell3.toString());
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("weight", cell1.toString());
+                    editor.putString("height", cell4.toString());
+                    editor.apply();
+
                     Log.d("edittext",weightText.getHint().toString());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -492,6 +501,9 @@ public class MainActivity extends AppCompatActivity {
                          c.setCellValue("IsSent");
                          c.setCellStyle(cs);
 
+                         c = headerRow.createCell(7);
+                         c.setCellValue("Height");
+                         c.setCellStyle(cs);
 
                          sheet1.setColumnWidth(0, (15 * 500));
                          sheet1.setColumnWidth(1, (15 * 500));
@@ -500,8 +512,9 @@ public class MainActivity extends AppCompatActivity {
                          sheet1.setColumnWidth(4, (15 * 500));
                          sheet1.setColumnWidth(5, (15 * 500));
                          sheet1.setColumnWidth(6, (15 * 500));
+                         sheet1.setColumnWidth(7, (15 * 500));
 
-                         ResultSet userHistoryInfo = statement.executeQuery("USE [Workout] SELECT CAST(WeightLoss as int)as WeightLoss,CAST(RecordDate AS DATE)as RecordDate, ProgramID, CAST(FatRatio as int)as FatRatio, CAST(MuscleRatio as int)as MuscleRatio from [UserWeightChangeLog] where UserID='" + loginRes.getString("ID") + "' order by RecordDate");
+                         ResultSet userHistoryInfo = statement.executeQuery("USE [Workout] SELECT CAST(WeightLoss as int)as WeightLoss,CAST(RecordDate AS DATE)as RecordDate, ProgramID, CAST(FatRatio as int)as FatRatio, CAST(MuscleRatio as int)as MuscleRatio,CAST(Height as int)as Height from [UserWeightChangeLog] where UserID='" + loginRes.getString("ID") + "' order by RecordDate");
                          int row = 1;
                          while (userHistoryInfo.next()) {
                              Row dataRow = sheet1.createRow(row);
@@ -524,6 +537,8 @@ public class MainActivity extends AppCompatActivity {
                              c.setCellValue("No Program");
                              c = dataRow.createCell(6);
                              c.setCellValue(1);
+                             c = dataRow.createCell(7);
+                             c.setCellValue(userHistoryInfo.getString("Height"));
                              row++;
                          }
                          FileOutputStream os = null;
@@ -638,6 +653,9 @@ public class MainActivity extends AppCompatActivity {
                              CellReference weightRef = new CellReference("E" + i);
                              Cell cell2 = row.getCell(weightRef.getCol());
                              cell2.setCellValue(sharedPref.getString("weight", ""));
+                             CellReference heightRef = new CellReference("F" + i);
+                             Cell cell3 = row.getCell(heightRef.getCol());
+                             cell3.setCellValue(sharedPref.getString("height", ""));
                              FileOutputStream os = null;
                              os = new FileOutputStream(usersFile);
                              myWorkBook.write(os);
@@ -779,12 +797,14 @@ public class MainActivity extends AppCompatActivity {
     public void setWeight(View view) {
         String role = sharedPref.getString("role", "");
         if (!role.equals("2")) {
-        EditText weightText = (EditText) findViewById(R.id.weightText);
-        String wT = weightText.getText().toString();
-        EditText fatText = (EditText) findViewById(R.id.fatText);
-        String fT = fatText.getText().toString();
-        EditText muscleText = (EditText) findViewById(R.id.muscleText);
-        String mT = muscleText.getText().toString();
+            EditText weightText = (EditText) findViewById(R.id.weightText);
+            String wT = weightText.getText().toString();
+            EditText fatText = (EditText) findViewById(R.id.fatText);
+            String fT = fatText.getText().toString();
+            EditText muscleText = (EditText) findViewById(R.id.muscleText);
+            String mT = muscleText.getText().toString();
+            EditText heightText = (EditText) findViewById(R.id.heightText);
+            String hT = heightText.getText().toString();
         Statement statement = null;
 
         if (!wT.isEmpty()) {
@@ -798,7 +818,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                    statement.executeUpdate("update Users set Weight=" + wT + " where ID ='" + sharedPref.getString("userId", "") + "'");//HEİGHT DEĞİŞTİRİRKEN BURAYA DA BAK
+                    statement.executeUpdate("update Users set Weight=" + wT + ", Height="+hT+" where ID ='" + sharedPref.getString("userId", "") + "'");//HEİGHT DEĞİŞTİRİRKEN BURAYA DA BAK
                 }
                 File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
                 if (weightFile.exists()) {
@@ -826,6 +846,8 @@ public class MainActivity extends AppCompatActivity {
                     c.setCellValue(sharedPref.getString("progname", ""));
                     c = dataRow.createCell(6);
                     c.setCellValue(0);
+                    c = dataRow.createCell(7);
+                    c.setCellValue(hT);
 
                     os = new FileOutputStream(weightFile);
                     myWorkBook.write(os);
@@ -853,8 +875,11 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     CellReference weightRef = new CellReference("E" + i);
+                    CellReference heightRef = new CellReference("F" + i);
                     Cell cell2 = row.getCell(weightRef.getCol());
                     cell2.setCellValue(wT);
+                    Cell cell3 = row.getCell(heightRef.getCol());
+                    cell3.setCellValue(hT);
                     os = new FileOutputStream(usersFile);
                     myWorkBook.write(os);
                     os.close();
@@ -873,6 +898,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), wT, Toast.LENGTH_LONG).show();
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString("weight", wT);
+            editor.putString("height", hT);
             editor.apply();
         }
 
@@ -900,20 +926,22 @@ public class MainActivity extends AppCompatActivity {
                             CellReference muscleRef = new CellReference("C" + i);
                             CellReference recordRef = new CellReference("D" + i);
                             CellReference progidRef = new CellReference("E" + i);
+                            CellReference heightRef = new CellReference("H" + i);
 
                             Cell cell1 = row.getCell(weightRef.getCol());
                             Cell cell2 = row.getCell(fatRef.getCol());
                             Cell cell3 = row.getCell(muscleRef.getCol());
                             Cell cell4 = row.getCell(recordRef.getCol());
                             Cell cell5 = row.getCell(progidRef.getCol());
+                            Cell cell6 = row.getCell(heightRef.getCol());
                             String progid="00000000-0000-0000-0000-000000000000";
                             if(!cell5.toString().isEmpty()){
                                 progid=cell5.toString();
                             }
                             String uniqueID = UUID.randomUUID().toString();
                             Statement statement3 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                            statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio])" +
-                                    "VALUES('"+ uniqueID +"','"+ sharedPref.getString("userId", "")+"',"+ cell1.toString() + ",'" + cell4.toString() + "','" + progid + "'," + cell2.toString() + "," + cell3.toString() + ")");
+                            statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio],[Height])" +
+                                    "VALUES('"+ uniqueID +"','"+ sharedPref.getString("userId", "")+"',"+ cell1.toString() + ",'" + cell4.toString() + "','" + progid + "'," + cell2.toString() + "," + cell3.toString() +  "," + cell6.toString()+")");
 
                             cell.setCellValue(1);
                             Log.d("weight",cell1.toString());

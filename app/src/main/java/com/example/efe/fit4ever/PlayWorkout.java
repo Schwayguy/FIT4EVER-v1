@@ -207,6 +207,7 @@ public class PlayWorkout extends AppCompatActivity {
                         if((Integer.parseInt(cell4.toString())==0)||(Integer.parseInt(cell4.toString())==1)){
                             i++;
                             j = 0;
+
                         }
                         else if (j+2 > Integer.parseInt(cell4.toString())) {
                             j = 0;
@@ -215,9 +216,10 @@ public class PlayWorkout extends AppCompatActivity {
                         } else {
                             j++;
                         }
-                            if((k < Integer.parseInt(cell4.toString())&&(j!=0))){
+                            if((k < Integer.parseInt(cell4.toString())||(j!=0))){
                                 k=j;
-                            }else{
+                            }
+                            if(j==0){
                                 k=Integer.parseInt(cell4.toString());
                             }
                             Log.d("aaab", String.valueOf(j)+" "+cell4.toString()+" "+cell2.toString()+" "+String.valueOf(i));

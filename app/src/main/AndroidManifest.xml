@@ -53,7 +53,8 @@
         <activity
             android:name=".ShowWorkout"
             android:screenOrientation="portrait" />
-        <activity android:name=".Rest"></activity>
+        <activity android:name=".Rest" />
+        <activity android:name=".TrainerProfile"></activity>
     </application>
 
 </manifest>
