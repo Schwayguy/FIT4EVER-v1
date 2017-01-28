@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -42,8 +43,8 @@ public class WorkoutHistory extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_workout_history);
-
         FileInputStream myInput = null;
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
         File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
@@ -69,18 +70,18 @@ public class WorkoutHistory extends AppCompatActivity {
                 layout.addView(view2, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
 
 
-                CellReference cellReference = new CellReference("E" + 2);
+                CellReference cellReference = new CellReference("E" + 3);
                 Row row = mySheet.getRow(cellReference.getRow());
                 if(row!=null) {
                     Cell cell = row.getCell(cellReference.getCol());
                     if (!cell.toString().equals("0.0")) {
-                        CellReference weightRef = new CellReference("A" + 2);
-                        CellReference fatRef = new CellReference("B" + 2);
-                        CellReference muscleRef = new CellReference("C" + 2);
-                        CellReference recordRef = new CellReference("D" + 2);
-                        CellReference progidRef = new CellReference("E" + 2);
-                        CellReference prognameRef = new CellReference("F" + 2);
-                        CellReference heightRef = new CellReference("H" + 2);
+                        CellReference weightRef = new CellReference("A" + 3);
+                        CellReference fatRef = new CellReference("B" + 3);
+                        CellReference muscleRef = new CellReference("C" + 3);
+                        CellReference recordRef = new CellReference("D" + 3);
+                        CellReference progidRef = new CellReference("E" + 3);
+                        CellReference prognameRef = new CellReference("F" + 3);
+                        CellReference heightRef = new CellReference("H" + 3);
 
                         Cell cell1 = row.getCell(weightRef.getCol());
                         Cell cell2 = row.getCell(recordRef.getCol());
@@ -101,8 +102,10 @@ public class WorkoutHistory extends AppCompatActivity {
                         String fatratio = cell5.toString();
                         String muscleratio = cell6.toString();
                         String height = cell7.toString();
-                        float bmi = 0;
-
+                        float bmi=0;
+                        if(!height.equals("0")) {
+                            bmi = Float.parseFloat(weightloss) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
+                        }
 
                         userweightinfo.setText("| " + progname + " | " + date + " | " + weightloss + " | " + height+ " | " +(int) bmi + " | " + fatratio + " | " + muscleratio + " | ");
                         userweightinfo.setGravity(Gravity.LEFT);
@@ -117,7 +120,7 @@ public class WorkoutHistory extends AppCompatActivity {
 
                     int j;
 
-                    for (i = 3; i <= rowNumber; i++) {
+                    for (i = 4; i <= rowNumber; i++) {
 
 
                         cellReference = new CellReference("E" + i);

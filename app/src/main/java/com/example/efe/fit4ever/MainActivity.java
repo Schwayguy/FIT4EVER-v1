@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo inet = conMgr.getActiveNetworkInfo();
@@ -116,15 +118,35 @@ public class MainActivity extends AppCompatActivity {
         profile.setContent(R.id.profile);
         profile.setIndicator("Profıle");
 
+        FileInputStream myInput = null;
         sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
-        String weight = sharedPref.getString("weight", "");
-        String height = sharedPref.getString("height", "");
-
-        if(!height.equals("")) {
-            TextView bmiText = (TextView) findViewById(R.id.bmitext);
-            Log.d("aaaasda",height+" "+weight);
-            float bmi = Float.parseFloat(weight) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
-            bmiText.setText("Your current BMI: " + bmi);
+        File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
+        LinearLayout layout = (LinearLayout) findViewById(R.id.historyvertical);
+        if (weightFile.exists()) {
+            try {
+                myInput = new FileInputStream(weightFile);
+                POIFSFileSystem myFileSystem = null;
+                myFileSystem = new POIFSFileSystem(myInput);
+                HSSFWorkbook myWorkBook = null;
+                myWorkBook = new HSSFWorkbook(myFileSystem);
+                HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                int rowNumber = mySheet.getPhysicalNumberOfRows();
+                CellReference weightRef = new CellReference("A" + rowNumber);
+                CellReference heightRef = new CellReference("H" + rowNumber);
+                Row row = mySheet.getRow(weightRef.getRow());
+                Cell cell1 = row.getCell(weightRef.getCol());
+                Cell cell2 = row.getCell(heightRef.getCol());
+                String weight = cell1.toString();
+                String height = cell2.toString();
+                TextView bmiText = (TextView) findViewById(R.id.bmitext);
+                float bmi=0;
+                if(!height.equals("0")){
+                    bmi = Float.parseFloat(weight) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
+                }
+                bmiText.setText("Your current BMI: " + bmi);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         EditText weightText = (EditText) findViewById(R.id.weightText);
@@ -187,8 +209,8 @@ public class MainActivity extends AppCompatActivity {
                 String classString = classspinner.getSelectedItem().toString();
                 String rateString = ratespinner.getSelectedItem().toString();
                 String searchSpinString = searchspinner.getSelectedItem().toString();
-                String searchString=searchText.getText().toString();
-                LinearLayout layout = (LinearLayout) findViewById(R.id.work1);
+                final String searchString=searchText.getText().toString();
+                final LinearLayout layout = (LinearLayout) findViewById(R.id.work1);
                 layout.removeAllViews();
                 if(inet!=null) {
                     try {
@@ -204,10 +226,10 @@ public class MainActivity extends AppCompatActivity {
                             level = 2;
                             levelString = String.valueOf(level);
                         }
-                        if(rateString.equals("")){
-                            rateString="";
-                        }else{
-                            rateString=String.valueOf(Math.round(Float.parseFloat(rateString)));
+                        if (rateString.equals("")) {
+                            rateString = "";
+                        } else {
+                            rateString = String.valueOf(Math.round(Float.parseFloat(rateString)));
                         }
                         int category = 0;
                         if (classString.equals("Agility")) {
@@ -223,31 +245,31 @@ public class MainActivity extends AppCompatActivity {
                             category = 3;
                             classString = String.valueOf(category);
                         }
-                        String userId=sharedPref.getString("userId", "");
-                        String role=sharedPref.getString("role", "");
-                        if(role.equals("2")){
-                            result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where ProgramLevel LIKE '%" + levelString + "%'" +
-                                    " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Programs].[Creator]='"+userId+"'");
-                        }
-                        else {
+                        final String userId = sharedPref.getString("userId", "");
+                        String role = sharedPref.getString("role", "");
+                        ResultSet result1 = null;
+                        ResultSet result2 = null;
+                        if (role.equals("2")) {
+                            result1 = statement.executeQuery(" select Programs.ID, Programs.Title from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] and [dbo].[Users].[IsActive]=1 and ProgramLevel LIKE '%" + levelString + "%'" +
+                                    " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Programs].[Creator]='" + userId + "' order by ProgramLevel");
+                        } else {
                             if (searchSpinString.equals("Program")) {
-                                result = statement.executeQuery(" select Programs.ID, Programs.Title from Programs where IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
-                                        " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%'");
+                                result1 = statement.executeQuery(" select Programs.ID, Programs.Title from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] and [dbo].[Users].[IsActive]=1  and [dbo].[Programs].[IsActive]=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
+                                        " AND ProgramCategory LIKE '%" + classString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' order by ProgramLevel");
                             } else {
-                                result = statement.executeQuery("select Programs.ID, Programs.Title from Programs INNER JOIN Users on Programs.IsActive=1 AND ProgramLevel LIKE '%" + levelString + "%'" +
-                                        " AND ProgramCategory LIKE '%" + classString + "%' AND Users.Username LIKE '%" + searchString + "%' AND Rate LIKE '%" + rateString + "%' and [dbo].[Users].[ID]=[dbo].[Programs].[Creator]");
+                                result2 = statement.executeQuery("select * from Users where IsActive=1 AND Username LIKE '%" + searchString + "%' AND Role=2 ");
                             }
                         }
-                        assert result != null;
-                        result.beforeFirst();
-                        while (result.next()) {
+
+                        if (result1!=null){
+                        while (result1.next()) {
                             Button btnTag = new Button(getApplicationContext());
                             btnTag.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-                            btnTag.setText(result.getString("Title"));
+                            btnTag.setText(result1.getString("Title"));
                             btnTag.setPadding(0, 10, 0, 0);
 
                             layout.addView(btnTag);
-                            final String progId = result.getString("ID");
+                            final String progId = result1.getString("ID");
                             btnTag.setOnClickListener(new View.OnClickListener() {
                                 public void onClick(View v) {
 
@@ -257,9 +279,55 @@ public class MainActivity extends AppCompatActivity {
 
                                 }
                             });
-
                         }
+                        }
+                        if (result2!=null){
+                            while (result2.next()) {
+                                Button btnTag = new Button(getApplicationContext());
+                                btnTag.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
+                                btnTag.setText(result2.getString("Username"));
+                                btnTag.setPadding(0, 10, 0, 0);
 
+                                layout.addView(btnTag);
+                                final String trainerId = result2.getString("ID");
+                                final String finalClassString = classString;
+                                final String finalRateString = rateString;
+                                final String finalLevelString = levelString;
+                                btnTag.setOnClickListener(new View.OnClickListener() {
+                                    public void onClick(View v) {
+                                        layout.removeAllViews();
+                                        try {
+                                            ResultSet result3 = statement.executeQuery(" select Programs.ID, Programs.Title from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] and [dbo].[Users].[IsActive]=1 and ProgramLevel LIKE '%" + finalLevelString + "%'" +
+                                                    " AND ProgramCategory LIKE '%" + finalClassString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + finalRateString + "%' and [dbo].[Programs].[Creator]='" + trainerId + "' order by ProgramLevel");
+
+                                            while (result3.next()) {
+                                                Button btnTag1 = new Button(getApplicationContext());
+                                                btnTag1.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
+                                                btnTag1.setText(result3.getString("Title"));
+                                                btnTag1.setPadding(0, 10, 0, 0);
+
+                                                layout.addView(btnTag1);
+                                                final String progId = result3.getString("ID");
+                                                btnTag1.setOnClickListener(new View.OnClickListener() {
+                                                    public void onClick(View v) {
+
+                                                        Intent intent = new Intent(getBaseContext(), WorkoutIntro.class);
+                                                        intent.putExtra("PROGID", progId);
+                                                        startActivity(intent);
+
+                                                    }
+                                                });
+
+                                            }
+                                        } catch (SQLException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                                });
+
+                            }
+                    }
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -274,11 +342,10 @@ public class MainActivity extends AppCompatActivity {
 
         String userId = sharedPref.getString("userId", "");
         pencere.setCurrentTab(1);
-        LinearLayout layout = (LinearLayout) findViewById(R.id.myWorkout);
+        layout = (LinearLayout) findViewById(R.id.myWorkout);
 
         if (!userId.isEmpty()) {
                 File programsFile = new File(getExternalFilesDir(null), "programs.xls");
-                FileInputStream myInput = null;
                 if (programsFile.exists()) {
                     try {
                         myInput = new FileInputStream(programsFile);
@@ -322,7 +389,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-            File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "")+ ".xls");
+            weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "")+ ".xls");
             if (weightFile.exists()) {
                 try {
                     myInput = new FileInputStream(weightFile);
@@ -433,23 +500,25 @@ public class MainActivity extends AppCompatActivity {
                                  CellReference muscleRef = new CellReference("C" + i);
                                  CellReference recordRef = new CellReference("D" + i);
                                  CellReference progidRef = new CellReference("E" + i);
+                                 CellReference heightRef = new CellReference("H" + i);
 
                                  Cell cell1 = row.getCell(weightRef.getCol());
                                  Cell cell2 = row.getCell(fatRef.getCol());
                                  Cell cell3 = row.getCell(muscleRef.getCol());
                                  Cell cell4 = row.getCell(recordRef.getCol());
                                  Cell cell5 = row.getCell(progidRef.getCol());
+                                 Cell cell6 = row.getCell(heightRef.getCol());
                                  String progid = "00000000-0000-0000-0000-000000000000";
                                  if (!cell5.toString().isEmpty()) {
                                      progid = cell5.toString();
                                  }
                                  String uniqueID = UUID.randomUUID().toString();
                                  Statement statement3 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                                 statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio])" +
-                                         "VALUES('" + uniqueID + "','" + sharedPref.getString("userId", "") + "'," + cell1.toString() + ",'" + cell4.toString() + "','" + progid + "'," + cell2.toString() + "," + cell3.toString() + ")");
+                                 statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio],[Height])" +
+                                         "VALUES('" + uniqueID + "','" + sharedPref.getString("userId", "") + "'," + cell1.toString() + ",'" + cell4.toString() + "','" + progid + "'," + cell2.toString() + "," + cell3.toString() + "," + cell6.toString() + ")");
 
                                  cell.setCellValue(1);
-                                 Log.d("weight", cell1.toString());
+
 
                              }
                              FileOutputStream os = null;
@@ -528,8 +597,8 @@ public class MainActivity extends AppCompatActivity {
                              c = dataRow.createCell(3);
                              c.setCellValue(userHistoryInfo.getString("RecordDate"));
                              c = dataRow.createCell(4);
-                             if(userHistoryInfo.getString("ProgramID").equals("00000000-0000-0000-0000-00000000000")){
-                                 c.setCellValue("");
+                             if(userHistoryInfo.getString("ProgramID").equals("00000000-0000-0000-0000-000000000000")){
+                                 c.setCellValue("00000000-0000-0000-0000-000000000000");//kolo
                              }else {
                                  c.setCellValue(userHistoryInfo.getString("ProgramID"));
                              }
@@ -557,7 +626,7 @@ public class MainActivity extends AppCompatActivity {
                              CellReference idRef = new CellReference("E" + i);
                              Row row1 = mySheet.getRow(idRef.getRow());
                              Cell cell1 = row1.getCell(idRef.getCol());
-                             if ((!cell1.toString().equals("00000000-0000-0000-0000-00000000000"))) {
+                             if ((!cell1.toString().equals("00000000-0000-0000-0000-000000000000"))) {
                                  CellReference titleRef = new CellReference("F" + i);
                                  ResultSet progTitleInfo = statement.executeQuery("USE [Workout] SELECT Title from Programs where ID = '"+cell1.toString()+"'");
                                  while (progTitleInfo.next()){
@@ -762,7 +831,7 @@ public class MainActivity extends AppCompatActivity {
         String pass = sharedPref.getString("password", "");
         String weight = sharedPref.getString("weight", "");
         String loginTime = sharedPref.getString("lastLoginDate", "");
-        Toast.makeText(this, name + " " + pass + " " + weight + " " + loginTime, Toast.LENGTH_LONG).show();
+       // Toast.makeText(this, name + " " + pass + " " + weight + " " + loginTime, Toast.LENGTH_LONG).show();
     }
 
     public void logOut(View view) {
@@ -807,7 +876,20 @@ public class MainActivity extends AppCompatActivity {
             String hT = heightText.getText().toString();
         Statement statement = null;
 
-        if (!wT.isEmpty()) {
+        if (wT.isEmpty()||fT.isEmpty()||mT.isEmpty()||hT.isEmpty()) {
+            if (weightText.getText().toString().isEmpty()) {
+               weightText.setError("Empty field");
+            }
+            if (fatText.getText().toString().isEmpty()) {
+                fatText.setError("Empty field");
+            }
+            if (muscleText.getText().toString().isEmpty()) {
+                muscleText.setError("Empty field");
+            }
+            if (heightText.getText().toString().isEmpty()) {
+                heightText.setError("Empty field");
+            }
+        }else {
             try {
                 ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo inet = conMgr.getActiveNetworkInfo();
@@ -818,7 +900,7 @@ public class MainActivity extends AppCompatActivity {
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
-                    statement.executeUpdate("update Users set Weight=" + wT + ", Height="+hT+" where ID ='" + sharedPref.getString("userId", "") + "'");//HEİGHT DEĞİŞTİRİRKEN BURAYA DA BAK
+                    statement.executeUpdate("update Users set Weight=" + wT + ", Height=" + hT + " where ID ='" + sharedPref.getString("userId", "") + "'");//HEİGHT DEĞİŞTİRİRKEN BURAYA DA BAK
                 }
                 File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
                 if (weightFile.exists()) {
@@ -895,76 +977,75 @@ public class MainActivity extends AppCompatActivity {
             curWeight = Integer.parseInt(wT);
             InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             mgr.hideSoftInputFromWindow(weightText.getWindowToken(), 0);
-            Toast.makeText(getApplicationContext(), wT, Toast.LENGTH_LONG).show();
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString("weight", wT);
             editor.putString("height", hT);
             editor.apply();
-        }
 
 
-        ConnectivityManager conMgr = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        final NetworkInfo inet = conMgr.getActiveNetworkInfo();
-        if(inet!= null) {
-            FileInputStream myInput = null;
-            File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
-            if (weightFile.exists()) {
-                try {
-                    myInput = new FileInputStream(weightFile);
-                    POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
-                    HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
-                    HSSFSheet mySheet = myWorkBook.getSheetAt(0);
-                    int rowNumber = mySheet.getPhysicalNumberOfRows();
-                    int i;
-                    for (i = 2; i <= rowNumber; i++) {
-                        CellReference cellReference = new CellReference("G" + i);
-                        Row row = mySheet.getRow(cellReference.getRow());
-                        Cell cell = row.getCell(cellReference.getCol());
-                        if (cell.toString().equals("0.0")) {
-                            CellReference weightRef = new CellReference("A" + i);
-                            CellReference fatRef = new CellReference("B" + i);
-                            CellReference muscleRef = new CellReference("C" + i);
-                            CellReference recordRef = new CellReference("D" + i);
-                            CellReference progidRef = new CellReference("E" + i);
-                            CellReference heightRef = new CellReference("H" + i);
+            ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            final NetworkInfo inet = conMgr.getActiveNetworkInfo();
+            if (inet != null) {
+                FileInputStream myInput = null;
+                File weightFile = new File(getExternalFilesDir(null), sharedPref.getString("userId", "") + ".xls");
+                if (weightFile.exists()) {
+                    try {
+                        myInput = new FileInputStream(weightFile);
+                        POIFSFileSystem myFileSystem = new POIFSFileSystem(myInput);
+                        HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                        HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                        int rowNumber = mySheet.getPhysicalNumberOfRows();
+                        int i;
+                        for (i = 2; i <= rowNumber; i++) {
+                            CellReference cellReference = new CellReference("G" + i);
+                            Row row = mySheet.getRow(cellReference.getRow());
+                            Cell cell = row.getCell(cellReference.getCol());
+                            if (cell.toString().equals("0.0")) {
+                                CellReference weightRef = new CellReference("A" + i);
+                                CellReference fatRef = new CellReference("B" + i);
+                                CellReference muscleRef = new CellReference("C" + i);
+                                CellReference recordRef = new CellReference("D" + i);
+                                CellReference progidRef = new CellReference("E" + i);
+                                CellReference heightRef = new CellReference("H" + i);
 
-                            Cell cell1 = row.getCell(weightRef.getCol());
-                            Cell cell2 = row.getCell(fatRef.getCol());
-                            Cell cell3 = row.getCell(muscleRef.getCol());
-                            Cell cell4 = row.getCell(recordRef.getCol());
-                            Cell cell5 = row.getCell(progidRef.getCol());
-                            Cell cell6 = row.getCell(heightRef.getCol());
-                            String progid="00000000-0000-0000-0000-000000000000";
-                            if(!cell5.toString().isEmpty()){
-                                progid=cell5.toString();
+                                Cell cell1 = row.getCell(weightRef.getCol());
+                                Cell cell2 = row.getCell(fatRef.getCol());
+                                Cell cell3 = row.getCell(muscleRef.getCol());
+                                Cell cell4 = row.getCell(recordRef.getCol());
+                                Cell cell5 = row.getCell(progidRef.getCol());
+                                Cell cell6 = row.getCell(heightRef.getCol());
+                                String progid = "00000000-0000-0000-0000-000000000000";
+                                if (!cell5.toString().isEmpty()) {
+                                    progid = cell5.toString();
+                                }
+                                String uniqueID = UUID.randomUUID().toString();
+                                Statement statement3 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                                statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio],[Height])" +
+                                        "VALUES('" + uniqueID + "','" + sharedPref.getString("userId", "") + "'," + cell1.toString() + ",'" + cell4.toString() + "','" + progid + "'," + cell2.toString() + "," + cell3.toString() + "," + cell6.toString() + ")");
+
+                                cell.setCellValue(1);
+                                Log.d("weight", cell1.toString());
+
                             }
-                            String uniqueID = UUID.randomUUID().toString();
-                            Statement statement3 = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                            statement3.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio],[Height])" +
-                                    "VALUES('"+ uniqueID +"','"+ sharedPref.getString("userId", "")+"',"+ cell1.toString() + ",'" + cell4.toString() + "','" + progid + "'," + cell2.toString() + "," + cell3.toString() +  "," + cell6.toString()+")");
-
-                            cell.setCellValue(1);
-                            Log.d("weight",cell1.toString());
-
+                            FileOutputStream os = null;
+                            os = new FileOutputStream(weightFile);
+                            myWorkBook.write(os);
+                            os.close();
                         }
-                        FileOutputStream os = null;
-                        os = new FileOutputStream(weightFile);
-                        myWorkBook.write(os);
-                        os.close();
-                    }
 
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
 
-        finish();
-        startActivity(getIntent());
+            finish();
+            startActivity(getIntent());
+        }
         }else{
             Toast.makeText(this,"Trainers aren't allowed to change their body information.",Toast.LENGTH_SHORT).show();
         }

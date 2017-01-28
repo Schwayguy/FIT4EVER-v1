@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -63,6 +64,7 @@ public class SignUp extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_sign_up);
         yearx = cal.get(Calendar.YEAR);
         monthx = cal.get(Calendar.MONTH);
@@ -121,6 +123,8 @@ public class SignUp extends AppCompatActivity {
 
     public void signupComplete(View view) throws NoSuchAlgorithmException {
         EditText username = (EditText) findViewById(R.id.usernameSign);
+        EditText fatratio = (EditText) findViewById(R.id.fatSign);
+        EditText muscleratio = (EditText) findViewById(R.id.muscleSign);
         EditText password = (EditText) findViewById(R.id.passwordSign);
         EditText passwordR = (EditText) findViewById(R.id.passwordRSign);
         EditText email = (EditText) findViewById(R.id.emailSign);
@@ -134,7 +138,7 @@ public class SignUp extends AppCompatActivity {
 
         if ((username.getText().toString().isEmpty()) || (password.getText().toString().isEmpty()) || (passwordR.getText().toString().isEmpty())
                 || (email.getText().toString().isEmpty()) || (name.getText().toString().isEmpty()) || (surname.getText().toString().isEmpty())
-                || (height.getText().toString().isEmpty()) || (weight.getText().toString().isEmpty())|| (phone.getText().toString().isEmpty())) {
+                || (height.getText().toString().isEmpty()) ||(fatratio.getText().toString().isEmpty()) ||(muscleratio.getText().toString().isEmpty()) || (weight.getText().toString().isEmpty())) {
 
             if (username.getText().toString().isEmpty()) {
                 username.setError("Empty field");
@@ -148,6 +152,12 @@ public class SignUp extends AppCompatActivity {
             if (email.getText().toString().isEmpty()) {
                 email.setError("Empty field");
             }
+            if (fatratio.getText().toString().isEmpty()) {
+                fatratio.setError("Empty field");
+            }
+            if (muscleratio.getText().toString().isEmpty()) {
+                muscleratio.setError("Empty field");
+            }
             if (name.getText().toString().isEmpty()) {
                 name.setError("Empty field");
             }
@@ -160,9 +170,6 @@ public class SignUp extends AppCompatActivity {
             if (weight.getText().toString().isEmpty()) {
                 weight.setError("Empty field");
             }
-            if (phone.getText().toString().isEmpty()) {
-                weight.setError("Empty field");
-            }
             if (!password.getText().toString().equals(passwordR.getText().toString())) {
                 passwordR.setError("Password mismatch");
             }
@@ -172,7 +179,8 @@ public class SignUp extends AppCompatActivity {
             Time creationDate = new Time(Time.getCurrentTimezone());
             creationDate.setToNow();
 
-            String  uniqueID = UUID.randomUUID().toString();
+            String  uniqueID1 = UUID.randomUUID().toString();
+            String  uniqueID2 = UUID.randomUUID().toString();
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             byte[] result = md.digest(password.getText().toString().getBytes());
             StringBuffer passbuffer = new StringBuffer();
@@ -205,18 +213,24 @@ public class SignUp extends AppCompatActivity {
                             "      ,[Height]\n" +
                             "      ,[Weight]\n" +
                             "      ,[ViewCount]) VALUES" +
-                            " ('" + uniqueID + "','" + username.getText().toString() + "','" + passbuffer.toString() + "','" + email.getText().toString() +
+                            " ('" + uniqueID1 + "','" + username.getText().toString() + "','" + passbuffer.toString() + "','" + email.getText().toString() +
                             "','" + name.getText().toString() + "','" +  surname.getText().toString() + "','"  + yearx  + "- " + monthx + "- " + dayx +"','"+  genderNo + "','"  + 1 + "','"
                             + cal.get(Calendar.YEAR) + "-" + String.valueOf(cal.get(Calendar.MONTH)+1) + "-" + cal.get(Calendar.DAY_OF_MONTH) + "','" + 1 + "','" + phone.getText().toString() + "','"+ height.getText().toString() + "','"
                             + weight.getText().toString() + "','" + 0 +"')");
                     Toast.makeText(this, "Signup complete.", Toast.LENGTH_SHORT).show();
+
+                    statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio],[Height])" +
+                            "VALUES('" + uniqueID2 + "','" + uniqueID1 + "'," + weight.getText().toString() + ",'" + cal.get(Calendar.YEAR) + "-" + String.valueOf(cal.get(Calendar.MONTH)+1) + "-" + cal.get(Calendar.DAY_OF_MONTH) + "','00000000-0000-0000-0000-000000000000',"
+                            + fatratio.getText().toString() + "," + muscleratio.getText().toString() + ","+height.getText().toString()+")");
+
                     SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("weight", weight.getText().toString());
+                    editor.putString("height", weight.getText().toString());
                     editor.apply();
 
 
-                    File weightFile = new File(getExternalFilesDir(null),uniqueID + ".xls");
+                    File weightFile = new File(getExternalFilesDir(null),uniqueID1 + ".xls");
 
 
                     Workbook wb = new HSSFWorkbook();
@@ -266,6 +280,25 @@ public class SignUp extends AppCompatActivity {
                     sheet1.setColumnWidth(4, (15 * 500));
                     sheet1.setColumnWidth(5, (15 * 500));
                     sheet1.setColumnWidth(6, (15 * 500));
+
+                    Row dataRow = sheet1.createRow(1);
+
+                    c = dataRow.createCell(0);
+                    c.setCellValue(weight.getText().toString());
+                    c = dataRow.createCell(1);
+                    c.setCellValue(fatratio.getText().toString());
+                    c = dataRow.createCell(2);
+                    c.setCellValue(muscleratio.getText().toString());
+                    c = dataRow.createCell(3);
+                    c.setCellValue(cal.get(Calendar.YEAR) + "-" + String.valueOf(cal.get(Calendar.MONTH)+1) + "-" + cal.get(Calendar.DAY_OF_MONTH));
+                    c = dataRow.createCell(4);
+                    c.setCellValue("00000000-0000-0000-0000-000000000000");
+                    c = dataRow.createCell(5);
+                    c.setCellValue("No Program");
+                    c = dataRow.createCell(6);
+                    c.setCellValue(0);
+                    c = dataRow.createCell(7);
+                    c.setCellValue(height.getText().toString());
 
                     FileOutputStream os = null;
                     os = new FileOutputStream(weightFile);

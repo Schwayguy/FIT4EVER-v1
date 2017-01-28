@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
         android:allowBackup="true"
@@ -53,8 +55,10 @@
         <activity
             android:name=".ShowWorkout"
             android:screenOrientation="portrait" />
-        <activity android:name=".Rest" />
-        <activity android:name=".TrainerProfile"></activity>
+        <activity android:name=".Rest"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".TrainerProfile"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

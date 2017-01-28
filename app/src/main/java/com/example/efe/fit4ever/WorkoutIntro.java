@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -97,6 +98,7 @@ public class WorkoutIntro extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_workout_intro);
         Intent intent = getIntent();
         progId = intent.getStringExtra("PROGID");
@@ -131,7 +133,6 @@ public class WorkoutIntro extends AppCompatActivity {
                     addition++;
                 }
                 progratevalue = ((one * 1) + (two * 2) + (three * 3) + (four * 4) + (five * 5)) / addition;
-                Toast.makeText(this,String.valueOf(progratevalue),Toast.LENGTH_SHORT).show();
             }
 
         } catch (SQLException e) {
@@ -232,11 +233,11 @@ public class WorkoutIntro extends AppCompatActivity {
                         int rateval = (int)rating;
                         switch (rateval)
                         {
-                            case 1: {  rateColumn ="One";  Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show();break; }
-                            case 2: {  rateColumn ="Two"; Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show(); break; }
-                            case 3: {  rateColumn ="Three";  Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show();break; }
-                            case 4: {  rateColumn ="Four";  Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show();break; }
-                            case 5: {  rateColumn ="Five"; Toast.makeText(getApplicationContext(),rateColumn,Toast.LENGTH_SHORT).show(); break; }
+                            case 1: {  rateColumn ="One";  break; }
+                            case 2: {  rateColumn ="Two";  break; }
+                            case 3: {  rateColumn ="Three"; break; }
+                            case 4: {  rateColumn ="Four";  break; }
+                            case 5: {  rateColumn ="Five";  break; }
 
                         }
                         try {
@@ -291,9 +292,9 @@ public class WorkoutIntro extends AppCompatActivity {
                 Log.e("ERRORc", e.getMessage());
             }
         try {
-            result = statement.executeQuery("select [dbo].[Comments].[ID], [dbo].[Comments].[Comment], [dbo].[Comments].[UserID], [dbo].[Users].[Username], [dbo].[Comments].[LikeCount] ,CAST([dbo].[Comments].[CreateDate] AS DATE)as CreateDate  " +
+            result = statement.executeQuery("select [dbo].[Comments].[ID], [dbo].[Comments].[Comment], [dbo].[Comments].[UserID],[dbo].[UPRelation].[IDPermission], [dbo].[Users].[Username], [dbo].[Comments].[LikeCount] ,CAST([dbo].[Comments].[CreateDate] AS DATE)as CreateDate  " +
                     "from [dbo].[Comments] INNER JOIN [dbo].[Users] on  [dbo].[Comments].[IsActive]=1 and" +
-                    "[dbo].[Comments].[ProgramID] = '"+progId+"' and [dbo].[Users].[ID]=[dbo].[Comments].[UserID] order by [dbo].[Comments].[CreateDate]");
+                    "[dbo].[Comments].[ProgramID] = '"+progId+"' and [dbo].[Users].[ID]=[dbo].[Comments].[UserID] INNER JOIN [dbo].[UPRelation] on [dbo].[UPRelation].[ProgramID] = '"+progId+"' and [dbo].[Users].[ID]=[dbo].[UPRelation].[UserID] order by [dbo].[Comments].[CreateDate]");
         } catch (SQLException e) {
             Log.e("ERRORc", e.getMessage());
         }
@@ -315,7 +316,11 @@ public class WorkoutIntro extends AppCompatActivity {
 
                 TextView username = new TextView(this);
                 username.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
-                username.setText(result.getString("LikeCount")+"     "+ result.getString("Username"));
+                if(result.getString("IDPermission").equals("1")){
+                    username.setText(result.getString("LikeCount")+"     "+ result.getString("Username"));
+                }else{
+                    username.setText(result.getString("LikeCount")+"     Anonymous");
+                }
                 username.setGravity(Gravity.RIGHT);
                 username.setPadding(0,5,0,0);
                 layout.addView(username);

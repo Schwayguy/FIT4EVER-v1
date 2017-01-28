@@ -1,14 +1,23 @@
 package com.example.efe.fit4ever;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.StrictMode;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,8 +36,8 @@ public class TrainerProfile extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_trainer_profile);
-
         ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo inet = conMgr.getActiveNetworkInfo();
         if (inet != null) {
@@ -55,6 +64,19 @@ public class TrainerProfile extends AppCompatActivity {
             e.printStackTrace();
         }
         try {
+            if(result.next()){
+                LinearLayout layout = (LinearLayout) findViewById(R.id.trainerprofile);
+
+                View view2 = new View(this);
+                view2.setBackgroundColor(0xFFC2BEBF);
+                layout.addView(view2, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+
+                TextView cer = new TextView(this);
+                cer.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
+                cer.setText("My Certificates");
+                cer.setPadding(0,10,0,0);
+                layout.addView(cer);
+                result.beforeFirst();
             while (result.next()){
                 nameText.setText(result.getString("Name")+" "+result.getString("Surname"));
                 usernameText.setText(result.getString("Username"));
@@ -68,6 +90,7 @@ public class TrainerProfile extends AppCompatActivity {
                     profileimg.setImageBitmap(BitmapFactory.decodeStream(newurl.openConnection() .getInputStream()));
                 }
             }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (MalformedURLException e) {
@@ -76,7 +99,32 @@ public class TrainerProfile extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        try {
+            result = statement.executeQuery("select * from Certificates where [dbo].[Certificates].[UserId] = '"+getIntent().getStringExtra("CREATOR")+"' and IsActive=1");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            LinearLayout layout = (LinearLayout) findViewById(R.id.trainerprofile);
+            while (result.next()){
+                Button btnTag = new Button(getApplicationContext());
+                btnTag.setLayoutParams(new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT));
+                btnTag.setText(result.getString("CertificateName"));
+                btnTag.setPadding(0, 10, 0, 0);
+                layout.addView(btnTag);
+                final String filename =result.getString("Filename");
 
+                btnTag.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://192.168.1.23:11124/Assets/Certificates/"+filename));
+                        startActivity(browserIntent);
+
+                    }
+                });
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public Connection CONN() {

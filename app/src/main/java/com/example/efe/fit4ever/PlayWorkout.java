@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -55,6 +56,7 @@ public class PlayWorkout extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_play_workout);
         final Button btnPlay = (Button) findViewById(R.id.buttonNext);
         final SharedPreferences sharedPref = getSharedPreferences("userInfo", Context.MODE_PRIVATE);

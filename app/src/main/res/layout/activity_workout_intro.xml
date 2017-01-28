@@ -95,6 +95,7 @@
                     android:layout_height="wrap_content"
                     android:text="New Text"
                     android:id="@+id/progOwnerText"
+                    android:drawableRight="@drawable/eye1"
                     android:layout_gravity="bottom|right" />
 
                 <CheckBox
