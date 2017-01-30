@@ -599,7 +599,40 @@ public class WorkoutIntro extends AppCompatActivity {
 
                 Toast.makeText(this, "Download successful.", Toast.LENGTH_SHORT).show();
                 os.close();
+
+            String role = sharedPref.getString("role", "");
+            if (role.equals("2")) {
+                File programsFile = new File(getExternalFilesDir(null).getAbsolutePath(),"programs.xls");
+                if(!programsFile.exists()) {
+                    FileInputStream myInput = null;
+                    myInput = new FileInputStream(programsFile);
+                    POIFSFileSystem myFileSystem = null;
+                    myFileSystem = new POIFSFileSystem(myInput);
+                    HSSFWorkbook myWorkBook = new HSSFWorkbook(myFileSystem);
+                    HSSFSheet mySheet = myWorkBook.getSheetAt(0);
+                    int rowNumber = mySheet.getPhysicalNumberOfRows();
+                    int i = 2;
+                    CellReference idRef = new CellReference("A" + i);
+                    CellReference progRef = new CellReference("L" + i);
+                    Row row1 = mySheet.getRow(idRef.getRow());
+                    Cell cell1 = row1.getCell(idRef.getCol());
+                    Cell cell2 = row1.getCell(progRef.getCol());
+                    while ((!cell1.toString().equals(getIntent().getStringExtra("PROGID")))&&(!cell2.toString().equals(userId))&&(i<=rowNumber)) {
+                        i++;
+                        idRef = new CellReference("A" + i);
+                        progRef = new CellReference("L" + i);
+                        row1 = mySheet.getRow(idRef.getRow());
+                        cell1 = row1.getCell(idRef.getCol());
+                        cell2 = row1.getCell(progRef.getCol());
+                    }
+                    if(i==rowNumber){
+                        AddToDevice();
+                    }
+                }
+            }else{
                 AddToDevice();
+            }
+
 
             } catch (SQLException e) {
                 Log.e("error download", e.getMessage());
