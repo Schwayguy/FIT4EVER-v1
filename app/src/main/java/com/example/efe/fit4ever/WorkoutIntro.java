@@ -603,7 +603,7 @@ public class WorkoutIntro extends AppCompatActivity {
             String role = sharedPref.getString("role", "");
             if (role.equals("2")) {
                 File programsFile = new File(getExternalFilesDir(null).getAbsolutePath(),"programs.xls");
-                if(!programsFile.exists()) {
+                if(programsFile.exists()) {
                     FileInputStream myInput = null;
                     myInput = new FileInputStream(programsFile);
                     POIFSFileSystem myFileSystem = null;
