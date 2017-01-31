@@ -135,13 +135,29 @@ public class SignUp extends AppCompatActivity {
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         String gender = spinner.getSelectedItem().toString();
         EditText phone = (EditText) findViewById(R.id.phoneSign);
+        EditText secq = (EditText) findViewById(R.id.secqSign);
+        EditText seca = (EditText) findViewById(R.id.secaSign);
+
+        String emailInput = email.getText().toString().trim();
+
+        String emailPattern = "^[_A-Za-z0-9-]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$";
+
 
         if ((username.getText().toString().isEmpty()) || (password.getText().toString().isEmpty()) || (passwordR.getText().toString().isEmpty())
-                || (email.getText().toString().isEmpty()) || (name.getText().toString().isEmpty()) || (surname.getText().toString().isEmpty())
-                || (height.getText().toString().isEmpty()) ||(fatratio.getText().toString().isEmpty()) ||(muscleratio.getText().toString().isEmpty()) || (weight.getText().toString().isEmpty())) {
+                || (secq.getText().toString().isEmpty())|| (seca.getText().toString().isEmpty())|| (email.getText().toString().isEmpty()) || (name.getText().toString().isEmpty()) || (surname.getText().toString().isEmpty())
+                ||  (!emailInput.matches(emailPattern))  || (height.getText().toString().isEmpty()) ||(fatratio.getText().toString().isEmpty()) ||(muscleratio.getText().toString().isEmpty()) || (weight.getText().toString().isEmpty())) {
 
             if (username.getText().toString().isEmpty()) {
                 username.setError("Empty field");
+            }
+            if (seca.getText().toString().isEmpty()) {
+                seca.setError("Empty field");
+            }
+            if (secq.getText().toString().isEmpty()) {
+                secq.setError("Empty field");
+            }
+            if (!emailInput.matches(emailPattern)) {
+                email.setError("Not an email");
             }
             if (password.getText().toString().isEmpty()) {
                 password.setError("Empty field");
@@ -212,11 +228,13 @@ public class SignUp extends AppCompatActivity {
                             "      ,[Phone]\n" +
                             "      ,[Height]\n" +
                             "      ,[Weight]\n" +
-                            "      ,[ViewCount]) VALUES" +
+                            "      ,[ViewCount]" +
+                            "      ,[SecurityQuestion]" +
+                            "      ,[SecurityAnswer]) VALUES" +
                             " ('" + uniqueID1 + "','" + username.getText().toString() + "','" + passbuffer.toString() + "','" + email.getText().toString() +
                             "','" + name.getText().toString() + "','" +  surname.getText().toString() + "','"  + yearx  + "- " + monthx + "- " + dayx +"','"+  genderNo + "','"  + 1 + "','"
                             + cal.get(Calendar.YEAR) + "-" + String.valueOf(cal.get(Calendar.MONTH)+1) + "-" + cal.get(Calendar.DAY_OF_MONTH) + "','" + 1 + "','" + phone.getText().toString() + "','"+ height.getText().toString() + "','"
-                            + weight.getText().toString() + "','" + 0 +"')");
+                            + weight.getText().toString() + "','" + 0 +"','"+secq.getText().toString()+"','"+seca.getText().toString()+"')");
                     Toast.makeText(this, "Signup complete.", Toast.LENGTH_SHORT).show();
 
                     statement.executeUpdate(" USE [Workout] INSERT INTO [dbo].[UserWeightChangeLog] ([ID],[UserId],[WeightLoss],[RecordDate],[ProgramID],[FatRatio],[MuscleRatio],[Height])" +

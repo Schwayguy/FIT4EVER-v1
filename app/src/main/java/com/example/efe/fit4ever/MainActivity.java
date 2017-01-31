@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 String height = cell2.toString();
                 TextView bmiText = (TextView) findViewById(R.id.bmitext);
                 float bmi=0;
-                if(!height.equals("0")){
+                if((!height.equals("0")||(!height.equals(""))||(!weight.equals("")))){
                     bmi = Float.parseFloat(weight) * 10000 / (Float.parseFloat(height) * Float.parseFloat(height));
                 }
                 bmiText.setText("Your current BMI: " + bmi);
@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity {
                                         layout.removeAllViews();
                                         try {
                                             ResultSet result3 = statement.executeQuery(" select Programs.ID, Programs.Title from Programs INNER JOIN Users on [dbo].[Users].[ID]=[dbo].[Programs].[Creator] and [dbo].[Users].[IsActive]=1 and ProgramLevel LIKE '%" + finalLevelString + "%'" +
-                                                    " AND ProgramCategory LIKE '%" + finalClassString + "%' AND Title LIKE '%" + searchString + "%' AND Rate LIKE '%" + finalRateString + "%' and [dbo].[Programs].[Creator]='" + trainerId + "' order by ProgramLevel");
+                                                    " AND ProgramCategory LIKE '%" + finalClassString + "%'  AND Rate LIKE '%" + finalRateString + "%' and [dbo].[Programs].[Creator]='" + trainerId + "' order by ProgramLevel");
 
                                             while (result3.next()) {
                                                 Button btnTag1 = new Button(getApplicationContext());
@@ -465,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
               e.printStackTrace();
            }
             try {
-             ResultSet loginRes = statement.executeQuery("select * from Users where Email ='"+usernameField.getText().toString()+"' AND Password='"+ passbuffer.toString()+"'");
+             ResultSet loginRes = statement.executeQuery("select * from Users where Email ='"+usernameField.getText().toString()+"' AND IsActive = 1 AND Password='"+ passbuffer.toString()+"'");
              if(!loginRes.next()){
               Toast.makeText(this,"Wrong email or password.",Toast.LENGTH_SHORT).show();
              }else {
